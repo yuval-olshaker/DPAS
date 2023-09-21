@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 from phased_arrays.utils import *
 
 
+def paper_gain(theta,b, k):
+    term = k * theta * b / 2
+    gain = (k * b) ** 2 / np.pi * (np.sin(term) ** 2) / (term ** 2)
+
+    return gain
+
 def dipole_pattern(theta, phi, L, k):
     """"
     Compute the radiation pattern for a dipole antenna oriented along the x-axis.
@@ -11,71 +17,54 @@ def dipole_pattern(theta, phi, L, k):
 
     # Handle the singularity at theta = 0 and theta = pi
     E[np.isnan(E)] = 0
-    return E
+    return np.abs(E)
 
 
 def phased_array_pattern(x, y, kx, ky, phasex, phasey):
     """
     Compute the array factor for a 2D rectangular grid of antennas.
     """
-    Nx, Ny = phasex.shape
+    Nx = len(phasex)
+    Ny = len(phasey)
     AF = np.zeros_like(kx, dtype=complex)
 
     for i in range(Nx):
         for j in range(Ny):
-            AF += np.exp(1j * (kx * x[i] + ky * y[j] + phasex[i , j] + phasey[i, j]))
+            AF += np.exp(1j * (kx * x[i] + ky * y[j] + phasex[i] + phasey[j]))
 
     return AF
 
+def calculate_phases(Nx, Ny, dx, dy, lambda_, theta_x, theta_y):
+    phaseX = [2 * np.pi * dx * i * np.sin(theta_x) / lambda_ for i in range(Nx)]
+    phaseY = [2 * np.pi * dy * j * np.sin(theta_y) / lambda_ for j in range(Ny)]
+    return phaseX, phaseY
+
 if __name__ == '__main__':
-    # Array dimensions
-    Nx = 5  # Number of elements along x
-    Ny = 5  # Number of elements along y
-    dx = 0.5 * wavelength  # Spacing along x
-    dy = 0.5 * wavelength  # Spacing along y
-
-    x = np.arange(Nx) * dx
-    y = np.arange(Ny) * dy
-
     # Phase distribution (for beam steering)
-    phasex = np.array([
-        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
-        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
-        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
-        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]
-    ])
-
-    phasey = np.array([
-        [0, -np.pi / 4, -np.pi / 2, -3 * np.pi / 4],
-        [0, -np.pi / 4, -np.pi / 2, -3 * np.pi / 4],
-        [0, -np.pi / 4, -np.pi / 2, -3 * np.pi / 4],
-        [0, -np.pi / 4, -np.pi / 2, -3 * np.pi / 4]
-    ])
-    # # Linear phase progression in x-direction (e.g., 45 degrees per element)
-    # phasex = np.deg2rad(45) * np.arange(Nx)
-    # # Quadratic phase progression in y-direction (e.g., 30 degrees per element squared)
-    # phasey = np.deg2rad(30) * (np.arange(Ny) ** 2)
-    print(phasex)
-    # Compute radiation pattern
-    theta = np.linspace(0, np.pi, 400)
-    phi = np.linspace(0, 2 * np.pi, 400)
-    THETA, PHI = np.meshgrid(theta, phi)
+    theta, phi = np.radians(0), np.radians(45)  # Desired steering angles in radians
+    phasesX, phasesY = calculate_phases(Nx, Ny, dx, dy, wavelength, theta, phi)
 
     kx = k * np.sin(THETA) * np.cos(PHI)
     ky = k * np.sin(THETA) * np.sin(PHI)
 
-    pattern = phased_array_pattern(x, y, kx, ky, phasex, phasey)
-    AF = np.abs(pattern)
+    PA_pattern = phased_array_pattern(x, y, kx, ky, phasesX, phasesY)
+    AF = np.abs(PA_pattern)
     DP = dipole_pattern(THETA, PHI, antenna_size, k)
+    DP_gain = 1.643 * DP # the max gain is 1.643
 
-    total_pattern = AF * DP
+    total_pattern = AF * DP_gain
+    total_pattern[total_pattern == 0] = epsilon
+    pattern_in_DB = 20 * np.log10(total_pattern)
+    print(np.max(pattern_in_DB))
+    print(np.argmax(pattern_in_DB))
 
     # Plot
     plt.figure()
-    pattern_in_DB = 20 * np.log10(total_pattern)
-    plt.pcolormesh(PHI, THETA, pattern_in_DB, shading='auto', vmin=-40, vmax=40)
+    PHI_deg = np.rad2deg(PHI)
+    THETA_deg = np.rad2deg(THETA)
+    plt.pcolormesh(PHI_deg, THETA_deg, pattern_in_DB, shading='auto', vmin=-40, vmax=40)
     plt.colorbar(label='Radiation Pattern (dB)')
     plt.title('Planar Antenna Array with Dipole Antennas Radiation Pattern')
-    plt.xlabel('Phi (radians)')
-    plt.ylabel('Theta (radians)')
+    plt.xlabel('Phi')
+    plt.ylabel('Theta')
     plt.show()
