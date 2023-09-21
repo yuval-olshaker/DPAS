@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 epsilon = 10**-9
 
-def isotropic_pattern(theta):
+def isotropic_gain(theta):
     """Return the gain of an isotropic antenna (equal in all directions)."""
     return 1.0
 
@@ -23,24 +23,25 @@ def phased_array_pattern(theta, num_elements, d, wavelength, steering_angle):
     n = np.arange(num_elements)
     delta_phi = (2 * np.pi / wavelength) * d * n * np.sin(steering_angle)
     array_factor = np.sum(np.exp(1j * (2 * np.pi / wavelength) * d * n[:, np.newaxis] * np.sin(theta) - 1j * delta_phi[:, np.newaxis]), axis=0)
-    phased_array_gain = slot_gain(theta) * array_factor # the gain of the entire array
-    phased_array_gain[phased_array_gain == 0] = epsilon # 0 value cannot have log
-    return phased_array_gain
+    phased_array_response = isotropic_pattern(theta) * array_factor # the gain of the entire array
+    phased_array_response[phased_array_response == 0] = epsilon # 0 value cannot have log
+    return phased_array_response
 
 if __name__ == '__main__':
     # Parameters
     num_elements = 25
     d = 0.5  # Spacing (in terms of wavelength)
     wavelength = 1
-    steering_angle = np.deg2rad(0)  # Desired steering angle in radians
+    steering_angle = np.deg2rad(30)  # Desired steering angle in radians
 
     # Calculate patterns
     theta = np.linspace(-np.pi/2, np.pi/2, 1000)
     array_response = phased_array_pattern(theta, num_elements, d, wavelength, steering_angle)
+    array_gain_in_DB = 20 * np.log10(np.abs(array_response))
 
     # Plot
     plt.figure(figsize=(10,6))
-    plt.plot(np.rad2deg(theta), 20 * np.log10(np.abs(array_response)))
+    plt.plot(np.rad2deg(theta), array_gain_in_DB)
     plt.xlabel('Angle (degrees)')
     plt.ylabel('Array Response (dB)')
     plt.title('Phased Array Antenna Simulation')
