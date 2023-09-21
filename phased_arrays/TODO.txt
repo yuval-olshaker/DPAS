@@ -1,5 +1,7 @@
 add parameters
-change from gain to actually energy
+
+go to 2 dimension array
+change from gain to return from function the energy itself and then correct into gain
 
 decide with antenna each element has (for now slot)
 

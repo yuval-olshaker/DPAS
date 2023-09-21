@@ -23,7 +23,7 @@ def phased_array_pattern(theta, num_elements, d, wavelength, steering_angle):
     n = np.arange(num_elements)
     delta_phi = (2 * np.pi / wavelength) * d * n * np.sin(steering_angle)
     array_factor = np.sum(np.exp(1j * (2 * np.pi / wavelength) * d * n[:, np.newaxis] * np.sin(theta) - 1j * delta_phi[:, np.newaxis]), axis=0)
-    phased_array_response = isotropic_pattern(theta) * array_factor # the gain of the entire array
+    phased_array_response = slot_gain(theta) * array_factor # the gain of the entire array
     phased_array_response[phased_array_response == 0] = epsilon # 0 value cannot have log
     return phased_array_response
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     num_elements = 25
     d = 0.5  # Spacing (in terms of wavelength)
     wavelength = 1
-    steering_angle = np.deg2rad(30)  # Desired steering angle in radians
+    steering_angle = np.deg2rad(180)  # Desired steering angle in radians
 
     # Calculate patterns
     theta = np.linspace(-np.pi/2, np.pi/2, 1000)
