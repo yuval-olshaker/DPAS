@@ -1,0 +1,8 @@
+add parameters
+change from gain to actually energy
+
+decide with antenna each element has (for now slot)
+
+calculate the difference between main lobe and highest side lobe
+
+add noise?

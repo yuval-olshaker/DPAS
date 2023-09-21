@@ -29,7 +29,7 @@ def phased_array_pattern(theta, num_elements, d, wavelength, steering_angle):
 
 if __name__ == '__main__':
     # Parameters
-    num_elements = 50
+    num_elements = 25
     d = 0.5  # Spacing (in terms of wavelength)
     wavelength = 1
     steering_angle = np.deg2rad(0)  # Desired steering angle in radians
