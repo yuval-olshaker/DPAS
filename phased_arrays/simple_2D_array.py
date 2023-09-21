@@ -1,6 +1,24 @@
 import matplotlib.pyplot as plt
+
 from phased_arrays.utils import *
 
+
+def radar_equation(Pt, G, Ae, sigma, R):
+    """
+    Calculate the received power using the radar equation.
+
+    Parameters:
+    - Pt: Transmitted power (W)
+    - G: Antenna gain (dimensionless, not in dB)
+    - Ae: Effective aperture (m^2)
+    - sigma: Radar cross-section (m^2)
+    - R: Range to the target (m)
+
+    Returns:
+    - Pr: Received power (W)
+    """
+    Pr = (Pt * G * Ae * sigma) / ((4 * np.pi)**2 * R**4)
+    return Pr
 
 def paper_gain(theta,b, k):
     term = k * theta * b / 2
@@ -13,7 +31,7 @@ def dipole_pattern(theta, phi, L, k):
     Compute the radiation pattern for a dipole antenna oriented along the x-axis.
     """
     # Radiation pattern for a dipole of length L oriented along the x-axis
-    E = np.cos(phi) * (np.cos(k * L * np.cos(theta) / 2) - np.cos(k * L / 2)) / np.sin(theta)
+    E = np.cos(phi) * ((np.cos(k * L * np.cos(theta) / 2) - np.cos(k * L / 2)) / np.sin(theta))
 
     # Handle the singularity at theta = 0 and theta = pi
     E[np.isnan(E)] = 0
@@ -24,12 +42,10 @@ def phased_array_pattern(x, y, kx, ky, phasex, phasey):
     """
     Compute the array factor for a 2D rectangular grid of antennas.
     """
-    Nx = len(phasex)
-    Ny = len(phasey)
     AF = np.zeros_like(kx, dtype=complex)
 
-    for i in range(Nx):
-        for j in range(Ny):
+    for i in range(len(x)):
+        for j in range(len(y)):
             AF += np.exp(1j * (kx * x[i] + ky * y[j] + phasex[i] + phasey[j]))
 
     return AF
@@ -41,7 +57,7 @@ def calculate_phases(Nx, Ny, dx, dy, lambda_, theta_x, theta_y):
 
 if __name__ == '__main__':
     # Phase distribution (for beam steering)
-    theta, phi = np.radians(0), np.radians(45)  # Desired steering angles in radians
+    theta, phi = np.radians(0), np.radians(0)  # Desired steering angles in radians
     phasesX, phasesY = calculate_phases(Nx, Ny, dx, dy, wavelength, theta, phi)
 
     kx = k * np.sin(THETA) * np.cos(PHI)
