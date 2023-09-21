@@ -2,26 +2,28 @@ import matplotlib.pyplot as plt
 from phased_arrays.utils import *
 
 
-def dipole_pattern(theta):
+def dipole_pattern(theta, phi, L, k):
+    """"
+    Compute the radiation pattern for a dipole antenna oriented along the x-axis.
     """
-    Compute the radiation pattern for a half-wave dipole antenna.
-    """
-    # Avoid division by zero at theta = 0 and theta = pi
-    theta = np.clip(theta, epsilon, np.pi - epsilon)
-    return np.cos(np.pi / 2 * np.cos(theta)) / np.sin(theta)
+    # Radiation pattern for a dipole of length L oriented along the x-axis
+    E = np.cos(phi) * (np.cos(k * L * np.cos(theta) / 2) - np.cos(k * L / 2)) / np.sin(theta)
+
+    # Handle the singularity at theta = 0 and theta = pi
+    E[np.isnan(E)] = 0
+    return E
 
 
 def phased_array_pattern(x, y, kx, ky, phasex, phasey):
     """
     Compute the array factor for a 2D rectangular grid of antennas.
     """
-    Nx = len(x)
-    Ny = len(y)
+    Nx, Ny = phasex.shape
+    AF = np.zeros_like(kx, dtype=complex)
 
-    AF = 0
     for i in range(Nx):
         for j in range(Ny):
-            AF += np.exp(1j * (kx * x[i] + ky * y[j] + phasex[i] + phasey[j]))
+            AF += np.exp(1j * (kx * x[i] + ky * y[j] + phasex[i , j] + phasey[i, j]))
 
     return AF
 
@@ -36,10 +38,23 @@ if __name__ == '__main__':
     y = np.arange(Ny) * dy
 
     # Phase distribution (for beam steering)
-    # Linear phase progression in x-direction (e.g., 45 degrees per element)
-    phasex = np.deg2rad(45) * np.arange(Nx)
-    # Quadratic phase progression in y-direction (e.g., 30 degrees per element squared)
-    phasey = np.deg2rad(30) * (np.arange(Ny) ** 2)
+    phasex = np.array([
+        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
+        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
+        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
+        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]
+    ])
+
+    phasey = np.array([
+        [0, -np.pi / 4, -np.pi / 2, -3 * np.pi / 4],
+        [0, -np.pi / 4, -np.pi / 2, -3 * np.pi / 4],
+        [0, -np.pi / 4, -np.pi / 2, -3 * np.pi / 4],
+        [0, -np.pi / 4, -np.pi / 2, -3 * np.pi / 4]
+    ])
+    # # Linear phase progression in x-direction (e.g., 45 degrees per element)
+    # phasex = np.deg2rad(45) * np.arange(Nx)
+    # # Quadratic phase progression in y-direction (e.g., 30 degrees per element squared)
+    # phasey = np.deg2rad(30) * (np.arange(Ny) ** 2)
     print(phasex)
     # Compute radiation pattern
     theta = np.linspace(0, np.pi, 400)
@@ -51,7 +66,7 @@ if __name__ == '__main__':
 
     pattern = phased_array_pattern(x, y, kx, ky, phasex, phasey)
     AF = np.abs(pattern)
-    DP = dipole_pattern(THETA)
+    DP = dipole_pattern(THETA, PHI, antenna_size, k)
 
     total_pattern = AF * DP
 
