@@ -54,7 +54,8 @@ if __name__ == '__main__':
 
     # frequency and array-arrangement (actual values)
     freq = 15e9  # frequency of operation in Hzs
-    wav_len = 3e8 / freq  # wavelength in meters
+    c = 3e8
+    wav_len = c / freq  # wavelength in meters
     M = 35  # no. of elements along the x-axis
     N = 35  # no. of elements along the y-axis
     a1 = 12e-3  # separation between elements along the x-axis in meters
@@ -69,7 +70,7 @@ if __name__ == '__main__':
     A = np.ones((N, M))  # Uniform excitation
     array_ip = pl.ip_format(a, b, A, gamma, plot=False, stem=True, mayavi_app=False)
 
-    circ_bound(array_ip, radius = 8.75, plot=True)
+    circ_bound(array_ip, radius = 8.75, plot=False)
 
     # Calling the 'pattern_p' function to evaluate and plot 2D AF/GF/NF/NF0
     # tht, F = pl.pattern_p(array_ip, tht_scan=0, phi_scan=0, phi=0 * np.pi,

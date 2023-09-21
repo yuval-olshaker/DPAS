@@ -10,8 +10,8 @@ import sympy as sp
 import scipy.signal as signal
 import matplotlib.pyplot as plt
 import warnings
-import Tkinter as ti
-import tkFileDialog as tkdlg
+# import Tkinter as ti
+# import tkFileDialog as tkdlg
 
 # adjusting "matplotlib" label fonts
 from matplotlib import rc
@@ -26,9 +26,10 @@ def ft_import(dtype='complex'):
                   
     :rtype:       Returns a Numpy ndarray
     """
-    master = ti.Tk(); master.withdraw() #hiding tkinter window 
-    file_path = tkdlg.askopenfilename(title="Open file", filetypes=[("txt file",
-                ".csv"), ("All files", ".*")]); master.quit()
+    # master = ti.Tk(); master.withdraw() #hiding tkinter window
+    # file_path = tkdlg.askopenfilename(title="Open file", filetypes=[("txt file",
+    #             ".csv"), ("All files", ".*")]); master.quit()
+    file_path = ''
     ip = np.loadtxt(file_path, delimiter=',', dtype=dtype)
     return ip
 

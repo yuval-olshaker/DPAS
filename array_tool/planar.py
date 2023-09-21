@@ -21,8 +21,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mayavi import mlab
 import Zolotarev as Zol
-import Tkinter as ti
-import tkFileDialog as tkdlg
 
 # adjusting "matplotlib" label fonts
 from matplotlib import rc
@@ -37,9 +35,10 @@ def at_import(dtype='complex'):
 
     :rtype:       ip, a Numpy ndarray
     """
-    master = ti.Tk(); master.withdraw()  # hiding tkinter window
-    file_path = tkdlg.askopenfilename(title="Open file", filetypes=[("txt file",
-                ".csv"), ("All files", ".*")]); master.quit()
+    # master = ti.Tk(); master.withdraw()  # hiding tkinter window
+    # file_path = tkdlg.askopenfilename(title="Open file", filetypes=[("txt file",
+    #             ".csv"), ("All files", ".*")]); master.quit()
+    file_path = ''
     ip = np.loadtxt(file_path, delimiter=',', dtype=dtype)
     return ip
 
@@ -56,9 +55,10 @@ def at_export(data=np.ones((0, 0)), data_ID=False, fmt='%.4e', mode='a'):
 
     :rtype:             A CSV text file
     """
-    master = ti.Tk(); master.withdraw()  # hiding tkinter window
-    file_path = tkdlg.asksaveasfile(mode, title="Save file", filetypes=[("txt file",
-                ".csv"), ("All files", ".*")]); master.quit()
+    # master = ti.Tk(); master.withdraw()  # hiding tkinter window
+    # file_path = tkdlg.asksaveasfile(mode, title="Save file", filetypes=[("txt file",
+    #             ".csv"), ("All files", ".*")]); master.quit()
+    file_path = ''
     if(data_ID):
         file_path.write(data_ID + '\n' + '\n')
     np.savetxt(file_path, data, delimiter=',', fmt=fmt)
