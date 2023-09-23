@@ -1,24 +1,6 @@
 import matplotlib.pyplot as plt
-
 from phased_arrays.utils import *
 
-
-def radar_equation(Pt, G, Ae, sigma, R):
-    """
-    Calculate the received power using the radar equation.
-
-    Parameters:
-    - Pt: Transmitted power (W)
-    - G: Antenna gain (dimensionless, not in dB)
-    - Ae: Effective aperture (m^2)
-    - sigma: Radar cross-section (m^2)
-    - R: Range to the target (m)
-
-    Returns:
-    - Pr: Received power (W)
-    """
-    Pr = (Pt * G * Ae * sigma) / ((4 * np.pi)**2 * R**4)
-    return Pr
 
 def paper_gain(theta,b, k):
     term = k * theta * b / 2
@@ -60,8 +42,8 @@ if __name__ == '__main__':
     theta, phi = np.radians(0), np.radians(0)  # Desired steering angles in radians
     phasesX, phasesY = calculate_phases(Nx, Ny, dx, dy, wavelength, theta, phi)
 
-    kx = k * np.sin(THETA) * np.cos(PHI)
-    ky = k * np.sin(THETA) * np.sin(PHI)
+    kx = k * np.outer(np.sin(THETA), np.cos(PHI))
+    ky = k * np.outer(np.sin(THETA), np.sin(PHI))
 
     PA_pattern = phased_array_pattern(x, y, kx, ky, phasesX, phasesY)
     AF = np.abs(PA_pattern)
