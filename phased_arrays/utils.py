@@ -10,7 +10,7 @@ antenna_size = wavelength / 2
 
 # Array dimensions
 Nx = 10  # Number of elements along x
-Ny = 10  # Number of elements along y
+Ny = Nx  # Number of elements along y
 dx = 0.5 * wavelength  # Spacing along x
 dy = 0.5 * wavelength  # Spacing along y
 x = np.arange(Nx) * dx
