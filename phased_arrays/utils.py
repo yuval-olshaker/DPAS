@@ -42,5 +42,5 @@ kB = 1.38 * 1e-23
 pulse_bandwidth = 50 * 1e6
 
 # Params for SNR
-G = 10000 # 40 DB
+G = 5000 # 37 DB
 Ae = Nx * Ny * 1 # 1 meter spacing for antenna size. affective size is the whole size

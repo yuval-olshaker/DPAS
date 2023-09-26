@@ -18,11 +18,11 @@ def radar_equation(Pt, G, Ae, sigma, R):
     Pr = (Pt * G * Ae * sigma) / ((4 * np.pi)**2 * R**4)
     return Pr
 
-def noise_power(temperature, kB, pulse_bandwidth):
+def noise_power():
     return temperature * kB * pulse_bandwidth
 
-def calculate_SNR(Pt_array, G, Ae, RCS, R, temperature, kB, pulse_bandwidth):
-    pure_SNR = radar_equation(Pt_array, G, Ae, RCS, R) / noise_power(temperature, kB, pulse_bandwidth)
+def calculate_SNR(Pt_array, G, Ae, RCS, R):
+    pure_SNR = radar_equation(Pt_array, G, Ae, RCS, R) / noise_power()
     return 10 * np.log10(pure_SNR)
 
 def total_power_per_scan_per_antenna(Pt_antenna, azimuth_resolution, elevation_resolution, azimuth_range, elevation_range):
@@ -43,7 +43,7 @@ def calculate_SNRs_for_changing_drones_num_and_Pt():
         for j in range(points_num):
             Pt_array = Pt_antenna[i] * Nx[j] * Ny[j]
             Ae = Nx[j] * Ny[j] * 1
-            SNRs[i, j] = calculate_SNR(Pt_array, G, Ae, RCS, R, temperature, kB, pulse_bandwidth)
+            SNRs[i, j] = calculate_SNR(Pt_array, G, Ae, RCS, R)
 
     return SNRs, Nx, Pt_antenna, total_power_per_scan
 
@@ -119,7 +119,6 @@ if __name__ == '__main__':
     # plt.xlabel('Drones Num per Axis')
     # plt.ylabel('Pt per Drone Pulse (W)')
     # plt.show()
-
     # print(np.max(SNRs))
     print(total_power_per_scan)
     print((azimuth_range / azimuth_resolution) * (elevation_range / elevation_resolution))
