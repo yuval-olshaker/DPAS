@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
 # Parameters
 frequency = 1e9  # 1 GHz
 c = 3e8  # Speed of light
@@ -31,7 +33,7 @@ Pt_antenna = 1 # in watt per pulse
 Pt_array = Pt_antenna * Nx * Ny
 
 # Target
-R = 100 * 1e3 #50 km
+R = 100 * 1e3
 RCS = 10
 
 # Noise

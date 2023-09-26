@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from phased_arrays.utils import *
 
 
