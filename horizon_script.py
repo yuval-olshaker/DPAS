@@ -22,15 +22,15 @@ def distance_to_time(distance):
 if __name__ == '__main__':
 
     # Fixed target height
-    target_height = 0.01  # 15m in km
+    target_height = 0.015  # 15m in km
 
     # Varying radar heights from 0 to 5000m
-    radar_heights = [i / 1000 for i in range(0, 5001)]  # Convert to km
+    radar_heights = [i / 1000 for i in range(0, 501)] # in km
     distances = [radar_horizon(radar_height, target_height) for radar_height in radar_heights]
     times = [distance_to_time(distance) for distance in distances]
 
     # Highlighted radar heights
-    highlighted_heights = [0.02, 0.1, 1, 3]  # 20m, 100m, 1000m, 3000m in km
+    highlighted_heights = [0.02, 0.1, 0.15, 0.2, 0.4, 0.5]
     highlighted_distances = [radar_horizon(height, target_height) for height in highlighted_heights]
     highlighted_times = [distance_to_time(distance) for distance in highlighted_distances]
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         plt.annotate(f"{height * 1000}m", (height, distance), textcoords="offset points", xytext=(0, 10), ha='center')
     plt.xlabel('Radar Height (km)')
     plt.ylabel('Distance (km)')
-    plt.title('Radar Target Visibility vs Radar Height - Target height 10m, Speed 850m/s')
+    plt.title('Radar Target Visibility vs Radar Height - Target height 15m, Speed 850m/s')
     plt.legend()
     plt.grid(True)
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         plt.annotate(f"{height * 1000}m", (height, time), textcoords="offset points", xytext=(0, 10), ha='center')
     plt.xlabel('Radar Height (km)')
     plt.ylabel('Time (seconds)')
-    plt.title('Time from Detection to Impact vs Radar Height - Target height 10m, Speed 850m/s')
+    plt.title('Time from Detection to Impact vs Radar Height - Target height 15m, Speed 850m/s')
     plt.legend()
     plt.grid(True)
 
