@@ -35,17 +35,13 @@ def calculate_SNRs_for_changing_drones_num_and_Pt():
     Nx = np.round(Nx)
     Ny = Nx
     SNRs = np.zeros((points_num, points_num))
-    total_power_per_scan = []
     for i in range(points_num):
-        total_power_per_scan.append(
-            total_power_per_scan_per_antenna(Pt_antenna[i], azimuth_resolution, elevation_resolution, azimuth_range,
-                                             elevation_range) / 1000)
         for j in range(points_num):
             Pt_array = Pt_antenna[i] * Nx[j] * Ny[j]
             Ae = Nx[j] * Ny[j] * 1
             SNRs[i, j] = calculate_SNR(Pt_array, G, Ae, RCS, R)
 
-    return SNRs, Nx, Pt_antenna, total_power_per_scan
+    return SNRs, Nx, Pt_antenna
 
 def plot_table(SNRs, Nx, Pt_antenna):
     # Create a 2D array
@@ -89,14 +85,13 @@ def plot_table(SNRs, Nx, Pt_antenna):
     plt.show()
 
 def to_exel(SNRs, Nx, Pt_antenna):
-    matrix = np.zeros((points_num + 2, points_num + 2))
+    matrix = np.zeros((points_num + 2, points_num + 1))
     for i in range(points_num):
-        matrix[0, i + 2] = Nx[i]
-        matrix[1, i + 2] = Nx[i] ** 2
+        matrix[0, i + 1] = Nx[i]
+        matrix[1, i + 1] = Nx[i] ** 2
         matrix[i + 2, 0] = Pt_antenna[i]
-        matrix[i + 2, 1] = total_power_per_scan_per_antenna(Pt_antenna[i], azimuth_resolution, elevation_resolution, azimuth_range, elevation_range)
         for j in range(points_num):
-            matrix[i + 2, j + 2] = SNRs[i, j]
+            matrix[i + 2, j + 1] = SNRs[i, j]
 
     matrix = np.around(matrix, 2) # 2 digits after the point
     df = pd.DataFrame(matrix)
@@ -105,7 +100,7 @@ def to_exel(SNRs, Nx, Pt_antenna):
 
 if __name__ == '__main__':
     points_num = 10
-    SNRs, Nx, Pt_antenna, total_power_per_scan = calculate_SNRs_for_changing_drones_num_and_Pt()
+    SNRs, Nx, Pt_antenna = calculate_SNRs_for_changing_drones_num_and_Pt()
     # Export to excel table
     to_exel(SNRs, Nx, Pt_antenna)
     # Plot table
@@ -120,8 +115,8 @@ if __name__ == '__main__':
     # plt.ylabel('Pt per Drone Pulse (W)')
     # plt.show()
     # print(np.max(SNRs))
-    print(total_power_per_scan)
-    print((azimuth_range / azimuth_resolution) * (elevation_range / elevation_resolution))
+    # print(total_power_per_scan)
+    # print((azimuth_range / azimuth_resolution) * (elevation_range / elevation_resolution))
     # print('total_power_per_scan_per_antenna: ' + str(total_power_per_scan_per_antenna(Pt_antenna, azimuth_resolution, elevation_resolution, azimuth_range, elevation_range) / 1000) + ' KW')
     # print('SNR: ' + str(calculate_SNR(Pt_array, G, Ae, RCS, R, temperature, kB, pulse_bandwidth)) + ' DB')
 
