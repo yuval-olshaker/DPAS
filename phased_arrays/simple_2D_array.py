@@ -16,8 +16,13 @@ def dipole_pattern(theta, phi, L, k):
 
     # Handle the singularity at theta = 0 and theta = pi
     E[np.isnan(E)] = 0
-    return np.abs(E)
+    return E
 
+def dipole_simple_one_dim_pattern(theta):
+    return np.cos(np.pi / 2 * np.cos(theta))
+
+def isotopic_pattern(theta):
+    return np.ones_like(theta)
 
 def phased_array_pattern(x, y, kx, ky, phasex, phasey):
     """
@@ -31,29 +36,55 @@ def phased_array_pattern(x, y, kx, ky, phasex, phasey):
 
     return AF
 
-def calculate_phases(Nx, Ny, dx, dy, lambda_, theta_x, theta_y):
-    phaseX = [2 * np.pi * dx * i * np.sin(theta_x) / lambda_ for i in range(Nx)]
-    phaseY = [2 * np.pi * dy * j * np.sin(theta_y) / lambda_ for j in range(Ny)]
+
+def array_factor(theta, phi, beta):
+    m_indices = np.arange(Nx)
+    n_indices = np.arange(Ny)
+    m_grid, n_grid, theta_grid, phi_grid = np.meshgrid(m_indices, n_indices, theta, phi, indexing='ij')
+
+    phase = (k * dx * m_grid * np.sin(theta_grid) * np.cos(phi_grid) +
+             k * dy * n_grid * np.sin(theta_grid) * np.sin(phi_grid) -
+             beta[m_grid, n_grid])
+
+    af = np.sum(np.exp(1j * phase), axis=(0, 1))
+
+    return np.abs(af)
+
+# The phases function
+def calculate_beta(steer_theta, steer_phi):
+    beta = np.zeros((Nx, Ny))
+    for i in range(Nx):
+        for j in range(Ny):
+            beta[i, j] = -k * dx * i * np.sin(steer_theta) * np.cos(steer_phi) - k * dy * j * np.sin(steer_theta) * np.sin(steer_phi)
+
+    return beta
+
+def calculate_phases(theta, phi):
+    phaseX = [2 * np.pi * dx * i * np.sin(phi) / wavelength for i in range(Nx)]
+    phaseY = [2 * np.pi * dy * j * np.sin(theta) / wavelength for j in range(Ny)]
     return phaseX, phaseY
 
 if __name__ == '__main__':
     # Phase distribution (for beam steering)
-    theta, phi = np.radians(0), np.radians(0)  # Desired steering angles in radians
-    phasesX, phasesY = calculate_phases(Nx, Ny, dx, dy, wavelength, theta, phi)
+    steer_theta, steer_phi = np.radians(0), np.radians(0)  # Desired steering angles in radians
+    beta = calculate_beta(steer_theta, steer_phi)
 
-    kx = k * np.outer(np.sin(THETA), np.cos(PHI))
-    ky = k * np.outer(np.sin(THETA), np.sin(PHI))
+    # phasesX, phasesY = calculate_phases(steer_theta, steer_phi)
+    # kx = k * np.outer(np.sin(THETA), np.cos(PHI))
+    # ky = k * np.outer(np.sin(THETA), np.sin(PHI))
+    # PA_pattern = phased_array_pattern(x, y, kx, ky, phasesX, phasesY)
 
-    PA_pattern = phased_array_pattern(x, y, kx, ky, phasesX, phasesY)
+    PA_pattern = array_factor(THETA, PHI, beta)
     AF = np.abs(PA_pattern)
-    DP = dipole_pattern(THETA, PHI, antenna_size, k)
-    DP_gain = 1.643 * DP # the max gain is 1.643
-
-    total_pattern = AF * DP_gain
+    IP = isotopic_pattern(THETA)
+    DP = dipole_simple_one_dim_pattern(THETA)
+    DP_gain = 1.643 * np.abs(DP) # the max gain is 1.643
+    SA = IP
+    total_pattern = AF * SA
     total_pattern[total_pattern == 0] = epsilon
     pattern_in_DB = 20 * np.log10(total_pattern)
     print(np.max(pattern_in_DB))
-    print(np.argmax(pattern_in_DB))
+    print(np.unravel_index(np.argmax(pattern_in_DB), pattern_in_DB.shape))
 
     # Plot
     plt.figure()

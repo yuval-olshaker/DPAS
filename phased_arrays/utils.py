@@ -19,14 +19,14 @@ x = np.arange(Nx) * dx
 y = np.arange(Ny) * dy
 
 # Angles
-THETA = np.linspace(-np.pi / 2, np.pi / 2, 400)
-PHI = np.linspace(-np.pi, np.pi, 400)
+azimuth_range = np.radians(120) # 120 degrees
+elevation_range = np.radians(60) # 60 degrees
+PHI = np.linspace(- azimuth_range / 2, azimuth_range / 2, 200)
+THETA = np.linspace(-elevation_range / 2, elevation_range / 2, 200)
 azimuth_resolution = 1 # milliradian
 azimuth_resolution = (azimuth_resolution / (1000 * 2 * np.pi)) * 360 # degrees
 elevation_resolution = 2 # milliradian
 elevation_resolution = (elevation_resolution / (1000 * 2 * np.pi)) * 360 # degrees
-azimuth_range = 120 #degrees
-elevation_range = 60 #degrees
 
 # Pulse energy at each antenna
 Pt_antenna = 1 # in watt per pulse
