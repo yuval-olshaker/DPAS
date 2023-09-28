@@ -37,18 +37,30 @@ def phased_array_pattern(x, y, kx, ky, phasex, phasey):
     return AF
 
 
-def array_factor(theta, phi, beta):
-    m_indices = np.arange(Nx)
-    n_indices = np.arange(Ny)
-    m_grid, n_grid, theta_grid, phi_grid = np.meshgrid(m_indices, n_indices, theta, phi, indexing='ij')
+def array_factor2(theta, phi, beta):
+    af = np.zeros((theta.shape[0], phi.shape[0]))
 
-    phase = (k * dx * m_grid * np.sin(theta_grid) * np.cos(phi_grid) +
-             k * dy * n_grid * np.sin(theta_grid) * np.sin(phi_grid) -
-             beta[m_grid, n_grid])
+    for i, t in enumerate(theta):
+        for j, p in enumerate(phi):
+            for m in range(Nx):
+                for n in range(Ny):
+                    af[i, j] += np.exp(
+                        1j * (k * dx * m * np.sin(t) * np.cos(p) + k * dy * n * np.sin(t) * np.sin(p) - beta[m, n]))
+
+    return af
+
+def array_factor(theta, phi, beta):
+    x_indices = np.arange(Nx)
+    y_indices = np.arange(Ny)
+    x_grid, y_grid, theta_grid, phi_grid = np.meshgrid(x_indices, y_indices, theta, phi, indexing='ij')
+
+    phase = (k * dx * x_grid * np.sin(theta_grid) * np.cos(phi_grid) +
+             k * dy * y_grid * np.sin(theta_grid) * np.sin(phi_grid) -
+             beta[x_grid, y_grid])
 
     af = np.sum(np.exp(1j * phase), axis=(0, 1))
 
-    return np.abs(af)
+    return af
 
 # The phases function
 def calculate_beta(steer_theta, steer_phi):
@@ -76,6 +88,9 @@ if __name__ == '__main__':
 
     PA_pattern = array_factor(THETA, PHI, beta)
     AF = np.abs(PA_pattern)
+    # AF2 = np.abs(array_factor2(THETA, PHI, beta))
+    # print(np.array_equal(AF, AF2))
+    # exit(0)
     IP = isotopic_pattern(THETA)
     DP = dipole_simple_one_dim_pattern(THETA)
     DP_gain = 1.643 * np.abs(DP) # the max gain is 1.643
@@ -83,13 +98,16 @@ if __name__ == '__main__':
     total_pattern = AF * SA
     total_pattern[total_pattern == 0] = epsilon
     pattern_in_DB = 20 * np.log10(total_pattern)
-    print(np.max(pattern_in_DB))
-    print(np.unravel_index(np.argmax(pattern_in_DB), pattern_in_DB.shape))
+
+    PHI_deg = np.rad2deg(PHI)
+    THETA_deg = np.rad2deg(THETA)
+    print('max gain DB: ' + str(np.max(pattern_in_DB)))
+    a = np.unravel_index(np.argmax(pattern_in_DB), pattern_in_DB.shape)
+    print('max db theta angle: ' + str(THETA_deg[a[0]]))
+    print('max db phi angle: ' + str(PHI_deg[a[1]]))
 
     # Plot
     plt.figure()
-    PHI_deg = np.rad2deg(PHI)
-    THETA_deg = np.rad2deg(THETA)
     plt.pcolormesh(PHI_deg, THETA_deg, pattern_in_DB, shading='auto', vmin=-40, vmax=40)
     plt.colorbar(label='Radiation Pattern (dB)')
     plt.title('Planar Antenna Array with Dipole Antennas Radiation Pattern')
