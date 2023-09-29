@@ -257,15 +257,27 @@ if __name__ == '__main__':
     target_range = 10000
     positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)
     density_of_single_antenna, _ = calculate_the_density_of_single_antenna_by_given_positions(array_center_pos, target_range)
-    densities = np.zeros_like(positions)
-    gains = np.zeros_like(angles)
+    densities = np.zeros((positions.shape[0], positions.shape[1]))
+    gains = np.zeros((positions.shape[0], positions.shape[1]))
     for i in range(positions.shape[0]):
         for j in range(positions.shape[1]):
             den = check_array_on_target(antennas_array, positions[i, j])
             gain = den / density_of_single_antenna
             densities[i, j] = den
             gains[i, j] = gain
-            print(f"Density at Position: {positions[i, j]}, Angles (Azimuth, Elevation): {angles[i,j]} is: {den}, the gain is {gain}")
+            # print(f"Density at Position: {positions[i, j]}, Angles (Azimuth, Elevation): {angles[i,j]} is: {den}, the gain is {gain}")
+
+    # Plot
+    PHI_deg = np.rad2deg(PHI)
+    THETA_deg = np.rad2deg(THETA)
+    gains_in_db = 10 * np.log10(gains)
+    plt.figure()
+    plt.pcolormesh(PHI_deg, THETA_deg, gains_in_db, shading='auto', vmin=-40, vmax=40)
+    plt.colorbar(label='Radiation Pattern (dB)')
+    plt.title('Planar Antenna Array with Isotropic Antennas Radiation Pattern')
+    plt.xlabel('Phi')
+    plt.ylabel('Theta')
+    plt.show()
 
     # for pos in positions:
     #     den = check_array_on_target(pos)
