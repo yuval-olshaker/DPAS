@@ -94,48 +94,51 @@ class IsotropicAntenna:
         phase_on_target = k * target_range + self.start_phase
         return power_density_on_target, phase_on_target
 
-
-def check_array_on_target(target_position):
+def create_antennas_array():
     """
-        Calculate the total power density at a target position from an array of isotropic antennas.
+        Create an array of isotropic antennas based on predefined grid dimensions and spacing.
 
-        The function initializes an array of isotropic antennas based on predefined grid dimensions (Nx, Ny)
-        and spacing (dx, dy). It then calculates the power densities and phases at the target position
-        for each antenna. Finally, it computes the total power density at the target position by summing
-        the contributions from all antennas.
-
-        Parameters:
-        - target_position (tuple or list): The target position where the total power density is to be calculated.
-                                           The format and dimensionality (e.g., 2D, 3D) should be consistent
-                                           with what the `calculate_radiation_at_target` and `IsotropicAntenna`
-                                           class expect.
+        This function initializes an array of isotropic antennas based on the predefined grid dimensions (Nx, Ny)
+        and spacing (dx, dy). The antennas are positioned in a grid pattern on the xy-plane, with the z-coordinate
+        fixed at 0 for all antennas.
 
         Returns:
-        - float: The total power density at the target position.
+        - list: A list of IsotropicAntenna objects representing the antenna array.
 
         Dependencies:
         - This function relies on the following external definitions:
             1. Nx, Ny: Grid dimensions for the antenna array.
             2. dx, dy: Spacing between antennas in the x and y directions.
             3. Pt_antenna: Power of each isotropic antenna.
-            4. IsotropicAntenna: A class representing an isotropic antenna. It should have a method or property
-                                 to return the radiation at a target position.
-            5. calculate_radiation_at_target: A function that calculates power densities and phases at a target
-                                              position for a given set of antennas.
-            6. sum_radiation: A function that sums up the power densities and phases to compute the total power
-                              density at the target position.
-
-        Note:
-        Ensure that the dependencies (Nx, Ny, dx, dy, Pt_antenna, IsotropicAntenna, calculate_radiation_at_target,
-        and sum_radiation) are properly defined and available in the scope where this function is used.
-        """
-    antennas = []
+            4. IsotropicAntenna: A class representing an isotropic antenna. It should have a constructor
+                                 that accepts position, starting phase, and power as arguments.
+    """
+    antennas_array = []
     for i in range(Nx + 1):
         for j in range(Ny + 1):
-            pos = (0, i * dx, j * dy)
-            antennas.append(IsotropicAntenna(pos, 0, Pt_antenna))
+            a_pos = (0, i * dx, j * dy)
+            antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna))
+    return antennas_array
 
-    power_densities_at_target, phases_at_target = calculate_radiation_at_target(np.array(antennas), target_position)
+def check_array_on_target(antennas_array, target_position):
+    """
+    Calculate the total power density at a target position from an array of given isotropic antennas.
+
+    The function calculates the power densities and phases at the target position
+    for each antenna. Finally, it computes the total power density at the target position by summing
+    the contributions from all antennas.
+
+    Parameters:
+    - antennas_array: The array of antennas
+    - target_position (tuple or list): The target position where the total power density is to be calculated.
+                                       The format and dimensionality (e.g., 2D, 3D) should be consistent
+                                       with what the `calculate_radiation_at_target` and `IsotropicAntenna`
+                                       class expect.
+
+    Returns:
+    - float: The total power density at the target position.
+    """
+    power_densities_at_target, phases_at_target = calculate_radiation_at_target(np.array(antennas_array), target_position)
     total_power_density = sum_radiation(np.array(power_densities_at_target), np.array(phases_at_target))
     return total_power_density
 
@@ -169,17 +172,91 @@ def generate_positions_at_distance_angles_from_point(point, angles_azi, angles_e
     return positions, np.degrees(angles)
 
 def calculate_the_density_of_single_antenna_by_given_positions(antenna_pos, target_range):
+    """
+        Calculate the radiation density of a single isotropic antenna at a given range.
+
+        This function initializes an isotropic antenna at a specified position and calculates
+        its radiation density at a given target range.
+
+        Parameters:
+        - antenna_pos (tuple or list): The position (x, y, z) of the isotropic antenna.
+        - target_range (float): The range (distance) from the antenna at which the radiation
+                                density is to be calculated.
+
+        Returns:
+        - float: The radiation density of the isotropic antenna at the specified target range.
+        """
     antenna = IsotropicAntenna(antenna_pos, 0, Pt_antenna)
     return antenna.radiation_at_range(target_range)
 
+
+def compute_phase_shifts(nx, ny, dx, dy, wavelength, theta, phi):
+    """
+    Computes phase shifts for a 2D phased array.
+
+    Parameters:
+    - nx: Number of elements in the x-direction.
+    - ny: Number of elements in the y-direction.
+    - dx: Spacing between elements in the x-direction.
+    - dy: Spacing between elements in the y-direction.
+    - wavelength: Wavelength of the signal.
+    - theta: Elevation angle in radians.
+    - phi: Azimuth angle in radians.
+
+    Returns:
+    - 2D numpy array of phase shifts for each element.
+    """
+
+    # Create arrays for the x and y indices of the elements
+    nx_indices = np.arange(nx)
+    ny_indices = np.arange(ny)
+
+    # Meshgrid to create 2D arrays for the x and y indices
+    nxx, nyy = np.meshgrid(nx_indices, ny_indices)
+
+    # Compute the phase shift for each element
+    delta_phi = -2 * np.pi * ((nxx * dx * np.sin(theta) * np.cos(phi) +
+                               nyy * dy * np.sin(theta) * np.sin(phi)) / wavelength)
+
+    return delta_phi
+
+
+def compute_phase_shifts_for_random_positions(antenna_positions, wavelength, theta, phi):
+    """
+    Computes phase shifts for antennas with random positions.
+
+    Parameters:
+    - antenna_positions: A numpy array of shape (N, 3), where N is the number of antennas, and each row is the (x, y, z) position of an antenna.
+    - wavelength: Wavelength of the signal.
+    - theta: Elevation angle in radians.
+    - phi: Azimuth angle in radians.
+
+    Returns:
+    - 1D numpy array of phase shifts for each antenna.
+    """
+
+    # Unit direction vector for the desired direction
+    direction = np.array([np.sin(theta) * np.cos(phi),
+                          np.sin(theta) * np.sin(phi),
+                          np.cos(theta)])
+
+    # Compute the dot product between the antenna positions and the direction vector
+    distance_differences = np.dot(antenna_positions, direction)
+
+    # Normalize by the wavelength and convert to phase shifts
+    delta_phi = -2 * np.pi * distance_differences / wavelength
+
+    return delta_phi
+
 if __name__ == '__main__':
     array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
+    antennas_array = create_antennas_array()
     target_range = 10000
     positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)
     density_of_single_antenna, _ = calculate_the_density_of_single_antenna_by_given_positions(array_center_pos, target_range)
     densities, gains = [], []
     for pos, ang in zip(positions, angles):
-        den = check_array_on_target(pos)
+        den = check_array_on_target(antennas_array, pos)
         gain = den / density_of_single_antenna
         densities.append(den)
         gains.append(gain)
