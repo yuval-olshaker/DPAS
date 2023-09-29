@@ -129,14 +129,16 @@ def check_array_on_target(target_position):
 
 if __name__ == '__main__':
     positions = []
+    array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
     for i in range(11):
         for j in range(11):
-            positions.append((10000, i * 1000, j * 1000))
-    positions.append((10000, Nx * dx / 2, Ny * dy / 2))
+            positions.append((5000, i * 1000, j * 1000))
+    positions.append((10000, array_center_pos[1], array_center_pos[2]))
 
     densities = []
     for pos in positions:
         den = check_array_on_target(pos)
-        densities.append(check_array_on_target(pos))
+        densities.append(den)
+        print('density at pos: ' + str(pos) + ' at ' + str(distance(pos, array_center_pos)) + ' distance from array center is: ' + str(den))
 
     a = 5
