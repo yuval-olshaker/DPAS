@@ -1,2 +1,4 @@
 work with angles, same distance for some targets - that how we can know the current angle
 add angle - we need 2
+
+split the check_array_on_target function - create array and check

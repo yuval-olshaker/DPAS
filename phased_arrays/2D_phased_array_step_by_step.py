@@ -69,17 +69,29 @@ class IsotropicAntenna:
 
         Parameters:
         - P: Total power radiated by the isotropic antenna (in watts).
-        - r: Distance from the antenna to the target (in meters).
-        - lambda_: Wavelength of the radiated wave (in meters).
-        - phi_0: Initial phase of the wave at the source (in radians). Default is 0.
+        - target_position: Position of the target.
 
         Returns:
         - Power density at the target position (in watts per square meter).
         - Phase of the wave at the target position (in radians).
         """
-        r = distance(self.position, target_position)
-        power_density_on_target = self.pulse_power / (4 * np.pi * r ** 2)
-        phase_on_target = k * r + self.start_phase
+        target_range = distance(self.position, target_position)
+        return self.radiation_at_range(target_range)
+
+    def radiation_at_range(self, target_range):
+        """
+        Calculate the power density and phase of the wave at the target position.
+
+        Parameters:
+        - P: Total power radiated by the isotropic antenna (in watts).
+        - target_range: range to the target.
+
+        Returns:
+        - Power density at the target position (in watts per square meter).
+        - Phase of the wave at the target position (in radians).
+        """
+        power_density_on_target = self.pulse_power / (4 * np.pi * target_range ** 2)
+        phase_on_target = k * target_range + self.start_phase
         return power_density_on_target, phase_on_target
 
 
@@ -127,18 +139,55 @@ def check_array_on_target(target_position):
     total_power_density = sum_radiation(np.array(power_densities_at_target), np.array(phases_at_target))
     return total_power_density
 
-if __name__ == '__main__':
-    positions = []
-    array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
-    for i in range(11):
-        for j in range(11):
-            positions.append((5000, i * 1000, j * 1000))
-    positions.append((10000, array_center_pos[1], array_center_pos[2]))
+def generate_positions_at_distance_angles_from_point(point, angles_azi, angles_ele, dis):
+    """
+    Generate positions at a given distance for all combinations of azimuth and elevation angles from a reference point.
 
-    densities = []
-    for pos in positions:
+    Parameters:
+    - point (tuple or list): The reference point (x, y, z).
+    - angles_azi (list or numpy array): List of azimuth angles in radians.
+    - angles_ele (list or numpy array): List of elevation angles in radians.
+    - dis (float): Distance from the reference point.
+
+    Returns:
+    - numpy array: Array of positions (x, y, z) at the given distance for all combinations of azimuth and elevation angles.
+    """
+    # Create a meshgrid for all combinations
+    azi_mesh, ele_mesh = np.meshgrid(angles_azi, angles_ele)
+
+    # Calculate the new positions using vectorized operations
+    x = point[0] + dis * np.cos(ele_mesh) * np.cos(azi_mesh)
+    y = point[1] + dis * np.cos(ele_mesh) * np.sin(azi_mesh)
+    z = point[2] + dis * np.sin(ele_mesh)
+
+    # Reshape and stack the results
+    positions = np.vstack((x.ravel(), y.ravel(), z.ravel())).T
+
+    # Reshape and stack the angles
+    angles = np.vstack((azi_mesh.ravel(), ele_mesh.ravel())).T
+
+    return positions, np.degrees(angles)
+
+def calculate_the_density_of_single_antenna_by_given_positions(antenna_pos, target_range):
+    antenna = IsotropicAntenna(antenna_pos, 0, Pt_antenna)
+    return antenna.radiation_at_range(target_range)
+
+if __name__ == '__main__':
+    array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
+    target_range = 10000
+    positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)
+    density_of_single_antenna, _ = calculate_the_density_of_single_antenna_by_given_positions(array_center_pos, target_range)
+    densities, gains = [], []
+    for pos, ang in zip(positions, angles):
         den = check_array_on_target(pos)
+        gain = den / density_of_single_antenna
         densities.append(den)
-        print('density at pos: ' + str(pos) + ' at ' + str(distance(pos, array_center_pos)) + ' distance from array center is: ' + str(den))
+        gains.append(gain)
+        print(f"Density at Position: {pos}, Angles (Azimuth, Elevation): {ang} is: {den}, the gain is {gain}")
+
+    # for pos in positions:
+    #     den = check_array_on_target(pos)
+    #     densities.append(den)
+    #     print('density at pos: ' + str(pos) + ' is: ' + str(den))
 
     a = 5
