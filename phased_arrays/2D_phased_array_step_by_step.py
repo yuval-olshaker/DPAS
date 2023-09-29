@@ -83,14 +83,60 @@ class IsotropicAntenna:
         return power_density_on_target, phase_on_target
 
 
-if __name__ == '__main__':
-    target_position = (0, 0, 0)
-    pos1 = (1, 0, 0)
-    pos2 = (0, 1, 0)
-    a1 = IsotropicAntenna(pos1, 0, Pt_antenna)
-    a2 = IsotropicAntenna(pos2, 0, Pt_antenna)
+def check_array_on_target(target_position):
+    """
+        Calculate the total power density at a target position from an array of isotropic antennas.
 
-    power_densities_at_target, phases_at_target = calculate_radiation_at_target(np.array([a1, a2]), target_position)
+        The function initializes an array of isotropic antennas based on predefined grid dimensions (Nx, Ny)
+        and spacing (dx, dy). It then calculates the power densities and phases at the target position
+        for each antenna. Finally, it computes the total power density at the target position by summing
+        the contributions from all antennas.
+
+        Parameters:
+        - target_position (tuple or list): The target position where the total power density is to be calculated.
+                                           The format and dimensionality (e.g., 2D, 3D) should be consistent
+                                           with what the `calculate_radiation_at_target` and `IsotropicAntenna`
+                                           class expect.
+
+        Returns:
+        - float: The total power density at the target position.
+
+        Dependencies:
+        - This function relies on the following external definitions:
+            1. Nx, Ny: Grid dimensions for the antenna array.
+            2. dx, dy: Spacing between antennas in the x and y directions.
+            3. Pt_antenna: Power of each isotropic antenna.
+            4. IsotropicAntenna: A class representing an isotropic antenna. It should have a method or property
+                                 to return the radiation at a target position.
+            5. calculate_radiation_at_target: A function that calculates power densities and phases at a target
+                                              position for a given set of antennas.
+            6. sum_radiation: A function that sums up the power densities and phases to compute the total power
+                              density at the target position.
+
+        Note:
+        Ensure that the dependencies (Nx, Ny, dx, dy, Pt_antenna, IsotropicAntenna, calculate_radiation_at_target,
+        and sum_radiation) are properly defined and available in the scope where this function is used.
+        """
+    antennas = []
+    for i in range(Nx + 1):
+        for j in range(Ny + 1):
+            pos = (0, i * dx, j * dy)
+            antennas.append(IsotropicAntenna(pos, 0, Pt_antenna))
+
+    power_densities_at_target, phases_at_target = calculate_radiation_at_target(np.array(antennas), target_position)
     total_power_density = sum_radiation(np.array(power_densities_at_target), np.array(phases_at_target))
+    return total_power_density
+
+if __name__ == '__main__':
+    positions = []
+    for i in range(11):
+        for j in range(11):
+            positions.append((10000, i * 1000, j * 1000))
+    positions.append((10000, Nx * dx / 2, Ny * dy / 2))
+
+    densities = []
+    for pos in positions:
+        den = check_array_on_target(pos)
+        densities.append(check_array_on_target(pos))
 
     a = 5
