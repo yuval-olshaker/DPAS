@@ -49,6 +49,12 @@ def sum_radiation(power_densities_at_target, phases_at_target):
     return total_power_density
 
 def antenna_radiation_at_target(antenna, target_pos):
+    """
+    Calculates the radiation_at_target of the antenna and target given
+    :param antenna: the antenna
+    :param target_pos: the position of the target
+    :return: antenna.radiation_at_target(target_pos)
+    """
     return antenna.radiation_at_target(target_pos)
 
 class IsotropicAntenna:
