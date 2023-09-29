@@ -44,3 +44,6 @@ pulse_bandwidth = 50 * 1e6
 # Params for SNR
 G = 5000 # 37 DB
 Ae = Nx * Ny * 1 # 1 meter spacing for antenna size. affective size is the whole size
+
+def distance(pos1, pos2):
+    return np.linalg.norm(np.array(pos1) - np.array(pos2))
