@@ -1,3 +1,5 @@
+import numpy as np
+
 from phased_arrays.utils import *
 
 
@@ -138,7 +140,7 @@ def check_array_on_target(antennas_array, target_position):
     Returns:
     - float: The total power density at the target position.
     """
-    power_densities_at_target, phases_at_target = calculate_radiation_at_target(np.array(antennas_array), target_position)
+    power_densities_at_target, phases_at_target = calculate_radiation_at_target(antennas_array, target_position)
     total_power_density = sum_radiation(np.array(power_densities_at_target), np.array(phases_at_target))
     return total_power_density
 
@@ -164,11 +166,12 @@ def generate_positions_at_distance_angles_from_point(point, angles_azi, angles_e
     z = point[2] + dis * np.sin(ele_mesh)
 
     # Reshape and stack the results
-    positions = np.vstack((x.ravel(), y.ravel(), z.ravel())).T
+    # positions = np.vstack((x.ravel(), y.ravel(), z.ravel())).T
+    positions = np.dstack((x, y, z))
 
     # Reshape and stack the angles
-    angles = np.vstack((azi_mesh.ravel(), ele_mesh.ravel())).T
-
+    # angles = np.vstack((azi_mesh.ravel(), ele_mesh.ravel())).T
+    angles = np.dstack((azi_mesh, ele_mesh))
     return positions, np.degrees(angles)
 
 def calculate_the_density_of_single_antenna_by_given_positions(antenna_pos, target_range):
@@ -250,17 +253,19 @@ def compute_phase_shifts_for_random_positions(antenna_positions, wavelength, the
 
 if __name__ == '__main__':
     array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
-    antennas_array = create_antennas_array()
+    antennas_array = np.array(create_antennas_array())
     target_range = 10000
     positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)
     density_of_single_antenna, _ = calculate_the_density_of_single_antenna_by_given_positions(array_center_pos, target_range)
-    densities, gains = [], []
-    for pos, ang in zip(positions, angles):
-        den = check_array_on_target(antennas_array, pos)
-        gain = den / density_of_single_antenna
-        densities.append(den)
-        gains.append(gain)
-        print(f"Density at Position: {pos}, Angles (Azimuth, Elevation): {ang} is: {den}, the gain is {gain}")
+    densities = np.zeros_like(positions)
+    gains = np.zeros_like(angles)
+    for i in range(positions.shape[0]):
+        for j in range(positions.shape[1]):
+            den = check_array_on_target(antennas_array, positions[i, j])
+            gain = den / density_of_single_antenna
+            densities[i, j] = den
+            gains[i, j] = gain
+            print(f"Density at Position: {positions[i, j]}, Angles (Azimuth, Elevation): {angles[i,j]} is: {den}, the gain is {gain}")
 
     # for pos in positions:
     #     den = check_array_on_target(pos)
