@@ -1,10 +1,2 @@
-add parameters
-
-go to 2 dimension array
-change from gain to return from function the energy itself and then correct into gain
-
-decide with antenna each element has (for now slot)
-
-calculate the difference between main lobe and highest side lobe
-
-add noise?
+work with angles, same distance for some targets - that how we can know the current angle
+add angle - we need 2
