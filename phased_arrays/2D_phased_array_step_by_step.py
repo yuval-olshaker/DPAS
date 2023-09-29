@@ -244,9 +244,9 @@ def compute_phase_shifts_for_random_positions(antenna_positions, wavelength, the
     distance_differences = np.dot(antenna_positions, direction)
 
     # Normalize by the wavelength and convert to phase shifts
-    delta_phi = -2 * np.pi * distance_differences / wavelength
+    delta_phases = -2 * np.pi * distance_differences / wavelength
 
-    return delta_phi
+    return delta_phases
 
 if __name__ == '__main__':
     array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
