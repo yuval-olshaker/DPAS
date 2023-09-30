@@ -1,4 +1,4 @@
-from phased_arrays.utils import *
+from Versatile_phased_array.utils import *
 import pandas as pd
 
 def radar_equation(Pt, G, Ae, sigma, R):

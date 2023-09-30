@@ -1,6 +1,4 @@
-import numpy as np
-
-from phased_arrays.utils import *
+from Versatile_phased_array.utils import *
 
 
 def calculate_radiation_at_target(antennas, target_pos):
