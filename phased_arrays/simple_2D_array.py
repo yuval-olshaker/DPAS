@@ -1,4 +1,4 @@
-from Versatile_phased_array.utils import *
+from phased_arrays.utils import *
 
 
 def paper_gain(theta,b, k):
