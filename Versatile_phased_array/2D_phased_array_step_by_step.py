@@ -293,6 +293,22 @@ def shift_phases_of_antennas_array(antennas_array, theta, phi):
     return antennas_array
 
 def print_max_gain_and_angles():
+    """
+        Prints the maximum gain value and its corresponding angles from the global 'gains_in_db' array.
+
+        This function searches for the maximum gain value in the 'gains_in_db' array and identifies its
+        corresponding angles from the 'angles' array. It then prints the maximum gain and the associated
+        azimuth (Phi) and elevation (Theta) angles.
+
+        Global Variables:
+        - gains_in_db (numpy array): A 2D array containing gain values in decibels.
+        - angles (numpy array): A 2D array containing tuples of (Phi, Theta) angles corresponding to
+                                the gain values in 'gains_in_db'.
+
+        Returns:
+        - None: This function does not return any value; it only prints the results.
+        """
+
     # Find the maximum value
     max_gain = np.amax(gains_in_db)
     # Find the linear index of the maximum value
