@@ -326,6 +326,7 @@ if __name__ == '__main__':
 
     gains_in_db = 10 * np.log10(gains)
     print_max_gain_and_angles()
+
     # Plot
     PHI_deg = np.rad2deg(PHI)
     THETA_deg = np.rad2deg(THETA)
