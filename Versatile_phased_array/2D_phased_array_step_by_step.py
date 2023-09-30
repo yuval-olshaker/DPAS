@@ -94,6 +94,14 @@ class IsotropicAntenna:
         phase_on_target = k * target_range + self.start_phase
         return power_density_on_target, phase_on_target
 
+    def __eq__(self, other):
+        if not isinstance(other, IsotropicAntenna):
+            return NotImplemented
+        return (self.position == other.position and
+                self.start_phase == other.start_phase and
+                self.pulse_power == other.pulse_power)
+
+
 def create_antennas_array():
     """
         Create an array of isotropic antennas based on predefined grid dimensions and spacing.
@@ -222,18 +230,22 @@ def compute_phase_shifts(nx, ny, dx, dy, wavelength, theta, phi):
     return delta_phi
 
 
-def compute_phase_shifts_for_random_positions(antenna_positions, wavelength, theta, phi):
+def compute_phase_shifts_for_given_antenna_positions(antenna_positions, theta, phi):
     """
     Computes phase shifts for antennas with random positions.
 
     Parameters:
     - antenna_positions: A numpy array of shape (N, 3), where N is the number of antennas, and each row is the (x, y, z) position of an antenna.
-    - wavelength: Wavelength of the signal.
     - theta: Elevation angle in radians.
     - phi: Azimuth angle in radians.
 
     Returns:
     - 1D numpy array of phase shifts for each antenna.
+
+     Note:
+    - The function assumes a global variable 'wavelength' representing the wavelength of the signal.
+    - The phase shifts are computed based on the principle of phase array beamforming, where adjusting
+      the phase of signals from individual antennas can steer the direction of the main beam.
     """
 
     # Unit direction vector for the desired direction
@@ -249,9 +261,56 @@ def compute_phase_shifts_for_random_positions(antenna_positions, wavelength, the
 
     return delta_phases
 
+def shift_phases_of_antennas_array(antennas_array, theta, phi):
+    """
+      Shift the phases of antennas in the array based on their positions and given angles.
+
+      This function calculates the phase shifts for each antenna in the array based on their positions
+      and the provided angles (theta and phi). It then updates the 'start_phase' attribute of each antenna
+      with the computed phase shift.
+
+      Parameters:
+      - antennas_array (numpy array): An array of antenna objects. Each antenna object should have
+                                     a 'position' attribute representing its location and a 'start_phase'
+                                     attribute representing its initial phase.
+      - theta (float): The theta angle (in radians) used for calculating the phase shift.
+      - phi (float): The phi angle (in radians) used for calculating the phase shift.
+
+      Returns:
+      - numpy array: The updated antennas array with modified 'start_phase' attributes.
+
+      Dependencies:
+      - This function relies on the following external definitions:
+          1. compute_phase_shifts_for_random_positions: A function that calculates the phase shifts
+                                                        for given positions and angles.
+      """
+
+    # Extract the 'position' attribute using numpy's vectorized operations
+    antenna_positions = np.transpose(np.vectorize(lambda antenna: antenna.position)(antennas_array))
+    delta_phases = compute_phase_shifts_for_given_antenna_positions(antenna_positions, theta, phi)
+    for antenna, delta_phase in zip(antennas_array, delta_phases):
+        antenna.start_phase = normalize_angle(delta_phase)
+    return antennas_array
+
+def print_max_gain_and_angles():
+    # Find the maximum value
+    max_gain = np.amax(gains_in_db)
+    # Find the linear index of the maximum value
+    linear_index = np.argmax(gains_in_db)
+    # Convert the linear index to 2D indices
+    row, col = np.unravel_index(linear_index, gains_in_db.shape)
+    # Get the angles
+    Phi, Theta = angles[row, col]
+
+    # prints
+    print(f"Maximum gain: {max_gain}")
+    print(f"Angles of maximum value: (Phi {Phi}, Theta {Theta})")
+
+
 if __name__ == '__main__':
     array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
     antennas_array = np.array(create_antennas_array())
+    antennas_array = shift_phases_of_antennas_array(antennas_array, np.radians(100), np.radians(30))
     target_range = 10000
     positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)
     density_of_single_antenna, _ = calculate_the_density_of_single_antenna_by_given_positions(array_center_pos, target_range)
@@ -265,10 +324,11 @@ if __name__ == '__main__':
             gains[i, j] = gain
             # print(f"Density at Position: {positions[i, j]}, Angles (Azimuth, Elevation): {angles[i,j]} is: {den}, the gain is {gain}")
 
+    gains_in_db = 10 * np.log10(gains)
+    print_max_gain_and_angles()
     # Plot
     PHI_deg = np.rad2deg(PHI)
     THETA_deg = np.rad2deg(THETA)
-    gains_in_db = 10 * np.log10(gains)
     plt.figure()
     plt.pcolormesh(PHI_deg, THETA_deg, gains_in_db, shading='auto', vmin=-40, vmax=40)
     plt.colorbar(label='Radiation Pattern (dB)')
