@@ -104,22 +104,17 @@ class IsotropicAntenna:
 
 def create_isotropic_antennas_planar_array(center):
     """
-        Create an array of isotropic antennas based on predefined grid dimensions and spacing.
+    Create a planar array of isotropic antennas with positions determined by the grid spacing `dy` and `dz`.
 
-        This function initializes an array of isotropic antennas based on the predefined grid dimensions (Nx, Ny)
-        and spacing (dx, dy). The antennas are positioned in a grid pattern on the xy-plane, with the z-coordinate
-        fixed at 0 for all antennas.
+    The function generates positions for each antenna in a planar grid defined by the spacings `dy` and `dz`.
+    The entire planar array is then centered around the provided `center` point. Each antenna is an instance
+    of the `IsotropicAntenna` class. The x-coordinate for each antenna is fixed at 0.
 
-        Returns:
-        - list: A list of IsotropicAntenna objects representing the antenna array.
+    Parameters:
+    - center (tuple): A tuple of (x, y, z) coordinates representing the center point where the planar array should be positioned.
 
-        Dependencies:
-        - This function relies on the following external definitions:
-            1. Nx, Ny: Grid dimensions for the antenna array.
-            2. dx, dy: Spacing between antennas in the x and y directions.
-            3. Pt_antenna: Power of each isotropic antenna.
-            4. IsotropicAntenna: A class representing an isotropic antenna. It should have a constructor
-                                 that accepts position, starting phase, and power as arguments.
+    Returns:
+    - list: A list of `IsotropicAntenna` objects positioned in a planar grid centered around the provided `center` point.
     """
     planar_center = (0, Ny * dy / 2, Nz * dz / 2)
     antennas_array = []
@@ -134,6 +129,19 @@ def create_isotropic_antennas_planar_array(center):
     return antennas_array
 
 def create_random_isotropic_antennas_array(center):
+    """
+    Create an array of isotropic antennas with random positions within a cube.
+
+    The function generates random positions for each antenna within a cube of side length `array_side_size`.
+    The cube is then centered around the provided `center` point. Each antenna is an instance of the
+    `IsotropicAntenna` class.
+
+    Parameters:
+    - center (tuple): A tuple of (x, y, z) coordinates representing the center point where the cube should be positioned.
+
+    Returns:
+    - list: A list of `IsotropicAntenna` objects with random positions within the cube.
+    """
     cube_center = (array_side_size / 2, array_side_size / 2, array_side_size / 2)
     antennas_array = []
     for i in range((Ny + 1) * (Nz + 1)):
@@ -198,19 +206,19 @@ def generate_positions_at_distance_angles_from_point(point, angles_azi, angles_e
 
 def calculate_the_density_of_single_antenna_by_given_positions(antenna_pos, target_range):
     """
-        Calculate the radiation density of a single isotropic antenna at a given range.
+    Calculate the radiation density of a single isotropic antenna at a given range.
 
-        This function initializes an isotropic antenna at a specified position and calculates
-        its radiation density at a given target range.
+    This function initializes an isotropic antenna at a specified position and calculates
+    its radiation density at a given target range.
 
-        Parameters:
-        - antenna_pos (tuple or list): The position (x, y, z) of the isotropic antenna.
-        - target_range (float): The range (distance) from the antenna at which the radiation
-                                density is to be calculated.
+    Parameters:
+    - antenna_pos (tuple or list): The position (x, y, z) of the isotropic antenna.
+    - target_range (float): The range (distance) from the antenna at which the radiation
+                            density is to be calculated.
 
-        Returns:
-        - float: The radiation density of the isotropic antenna at the specified target range.
-        """
+    Returns:
+    - float: The radiation density of the isotropic antenna at the specified target range.
+    """
     antenna = IsotropicAntenna(antenna_pos, 0, Pt_antenna)
     return antenna.radiation_at_range(target_range)
 
@@ -277,27 +285,27 @@ def compute_phase_shifts_for_given_antenna_positions(antenna_positions, theta, p
 
 def shift_phases_of_antennas_array(antennas_array, theta, phi):
     """
-      Shift the phases of antennas in the array based on their positions and given angles.
+    Shift the phases of antennas in the array based on their positions and given angles.
 
-      This function calculates the phase shifts for each antenna in the array based on their positions
-      and the provided angles (theta and phi). It then updates the 'start_phase' attribute of each antenna
-      with the computed phase shift.
+    This function calculates the phase shifts for each antenna in the array based on their positions
+    and the provided angles (theta and phi). It then updates the 'start_phase' attribute of each antenna
+    with the computed phase shift.
 
-      Parameters:
-      - antennas_array (numpy array): An array of antenna objects. Each antenna object should have
-                                     a 'position' attribute representing its location and a 'start_phase'
-                                     attribute representing its initial phase.
-      - theta (float): The theta angle (in radians) used for calculating the phase shift.
-      - phi (float): The phi angle (in radians) used for calculating the phase shift.
+    Parameters:
+    - antennas_array (numpy array): An array of antenna objects. Each antenna object should have
+                                 a 'position' attribute representing its location and a 'start_phase'
+                                 attribute representing its initial phase.
+    - theta (float): The theta angle (in radians) used for calculating the phase shift.
+    - phi (float): The phi angle (in radians) used for calculating the phase shift.
 
-      Returns:
-      - numpy array: The updated antennas array with modified 'start_phase' attributes.
+    Returns:
+    - numpy array: The updated antennas array with modified 'start_phase' attributes.
 
-      Dependencies:
-      - This function relies on the following external definitions:
-          1. compute_phase_shifts_for_random_positions: A function that calculates the phase shifts
-                                                        for given positions and angles.
-      """
+    Dependencies:
+    - This function relies on the following external definitions:
+      1. compute_phase_shifts_for_random_positions: A function that calculates the phase shifts
+                                                    for given positions and angles.
+    """
 
     # Extract the 'position' attribute using numpy's vectorized operations
     antenna_positions = np.transpose(np.vectorize(lambda antenna: antenna.position)(antennas_array))
@@ -308,20 +316,20 @@ def shift_phases_of_antennas_array(antennas_array, theta, phi):
 
 def print_max_gain_and_angles():
     """
-        Prints the maximum gain value and its corresponding angles from the global 'gains_in_db' array.
+    Prints the maximum gain value and its corresponding angles from the global 'gains_in_db' array.
 
-        This function searches for the maximum gain value in the 'gains_in_db' array and identifies its
-        corresponding angles from the 'angles' array. It then prints the maximum gain and the associated
-        azimuth (Phi) and elevation (Theta) angles.
+    This function searches for the maximum gain value in the 'gains_in_db' array and identifies its
+    corresponding angles from the 'angles' array. It then prints the maximum gain and the associated
+    azimuth (Phi) and elevation (Theta) angles.
 
-        Global Variables:
-        - gains_in_db (numpy array): A 2D array containing gain values in decibels.
-        - angles (numpy array): A 2D array containing tuples of (Phi, Theta) angles corresponding to
-                                the gain values in 'gains_in_db'.
+    Global Variables:
+    - gains_in_db (numpy array): A 2D array containing gain values in decibels.
+    - angles (numpy array): A 2D array containing tuples of (Phi, Theta) angles corresponding to
+                            the gain values in 'gains_in_db'.
 
-        Returns:
-        - None: This function does not return any value; it only prints the results.
-        """
+    Returns:
+    - None: This function does not return any value; it only prints the results.
+    """
 
     # Find the maximum value
     max_gain = np.amax(gains_in_db)
