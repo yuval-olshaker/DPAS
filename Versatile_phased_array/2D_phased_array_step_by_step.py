@@ -321,6 +321,37 @@ def print_max_gain_and_angles():
     print(f"Angles of maximum value: (Phi {Phi}, Theta {Theta})")
 
 if __name__ == '__main__':
+    """
+    This script simulates the radiation pattern of a planar antenna array with isotropic antennas.
+
+    Key Variables:
+    - array_center_pos: The center position of the antenna array.
+    - antennas_array: The array of antennas.
+    - target_range: The range to the target.
+    - positions: The positions of the antennas.
+    - angles: The angles corresponding to the positions.
+    - density_of_single_antenna: The density of a single antenna at the given position.
+    - densities: The densities of the antennas.
+    - gains: The gains of the antennas.
+    - gains_in_db: The gains of the antennas in decibels.
+
+    Functions:
+    - create_antennas_array(): Creates an array of antennas.
+    - shift_phases_of_antennas_array(): Shifts the phases of the antennas in the array.
+    - generate_positions_at_distance_angles_from_point(): Generates positions at a specified distance and angles from a point.
+    - calculate_the_density_of_single_antenna_by_given_positions(): Calculates the density of a single antenna at the given positions.
+    - check_array_on_target(): Checks the array on the target and returns the density.
+    - print_max_gain_and_angles(): Prints the maximum gain and the corresponding angles.
+
+    The script:
+    1. Initializes the center position of the antenna array.
+    2. Creates an array of antennas and shifts their phases.
+    3. Generates positions and angles for the antennas at a specified distance from the center position.
+    4. Calculates the density of a single antenna at the given positions.
+    5. Iterates over the positions and calculates the density and gain for each position.
+    6. Converts the gains to decibels.
+    7. Plots the radiation pattern of the antenna array.
+    """
     array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
     antennas_array = np.array(create_antennas_array())
     antennas_array = shift_phases_of_antennas_array(antennas_array, np.radians(90), np.radians(0))
