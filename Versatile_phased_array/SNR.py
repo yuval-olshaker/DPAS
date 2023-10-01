@@ -30,7 +30,7 @@ def total_power_per_scan_per_antenna(Pt_antenna, azimuth_resolution, elevation_r
 
 def calculate_SNRs_for_changing_drones_num_and_Pt():
     # change antenna Pt and drones number
-    Pt_antenna = np.linspace(1, 20, points_num)
+    Pt_antenna = np.linspace(1, 100, points_num)
     Nx = np.linspace(4, 20, points_num)
     Nx = np.round(Nx)
     Ny = Nx
@@ -99,7 +99,7 @@ def to_exel(SNRs, Nx, Pt_antenna):
 
 
 if __name__ == '__main__':
-    points_num = 10
+    points_num = 11
     SNRs, Nx, Pt_antenna = calculate_SNRs_for_changing_drones_num_and_Pt()
     # Export to excel table
     to_exel(SNRs, Nx, Pt_antenna)
