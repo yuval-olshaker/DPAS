@@ -49,6 +49,16 @@ Ae = Nx * Ny * 1 # 1 meter spacing for antenna size. affective size is the whole
 pos_error_sigma_per_axis = 1 / 100 # 0.5 cm error per axis
 
 def distance(pos1, pos2):
+    """
+        Calculate the Euclidean distance between two points.
+
+        Parameters:
+        - pos1 (tuple or list): Coordinates of the first point. Can be in N-dimensional space.
+        - pos2 (tuple or list): Coordinates of the second point. Must have the same dimensionality as pos1.
+
+        Returns:
+        - float: The Euclidean distance between pos1 and pos2.
+    """
     return np.linalg.norm(np.array(pos1) - np.array(pos2))
 
 def normalize_angle(angle):
