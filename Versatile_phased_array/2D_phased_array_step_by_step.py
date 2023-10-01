@@ -1,6 +1,5 @@
 from Versatile_phased_array.utils import *
 
-
 def calculate_radiation_at_target(antennas, target_pos):
     """
      Calculate the radiation power densities and phases at a target position from a list of antennas.
@@ -103,7 +102,6 @@ class IsotropicAntenna:
                 self.start_phase == other.start_phase and
                 self.pulse_power == other.pulse_power)
 
-
 def create_antennas_array():
     """
         Create an array of isotropic antennas based on predefined grid dimensions and spacing.
@@ -200,7 +198,6 @@ def calculate_the_density_of_single_antenna_by_given_positions(antenna_pos, targ
     antenna = IsotropicAntenna(antenna_pos, 0, Pt_antenna)
     return antenna.radiation_at_range(target_range)
 
-
 def compute_phase_shifts(nx, ny, dx, dy, wavelength, theta, phi):
     """
     Computes phase shifts for a 2D phased array.
@@ -230,7 +227,6 @@ def compute_phase_shifts(nx, ny, dx, dy, wavelength, theta, phi):
                                nyy * dy * np.sin(theta) * np.sin(phi)) / wavelength)
 
     return delta_phi
-
 
 def compute_phase_shifts_for_given_antenna_positions(antenna_positions, theta, phi):
     """
@@ -323,7 +319,6 @@ def print_max_gain_and_angles():
     # prints
     print(f"Maximum gain: {max_gain}")
     print(f"Angles of maximum value: (Phi {Phi}, Theta {Theta})")
-
 
 if __name__ == '__main__':
     array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
