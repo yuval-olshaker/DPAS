@@ -1,3 +1,5 @@
-add errors - how they affect us
+add time error - how they affect us
 
 get more distance between antennas - really random positioning
+
+check real targets - where do we actually see them

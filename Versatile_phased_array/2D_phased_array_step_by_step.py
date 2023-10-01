@@ -58,7 +58,9 @@ def antenna_radiation_at_target(antenna, target_pos):
     return antenna.radiation_at_target(target_pos)
 
 class IsotropicAntenna:
-    def __init__(self, position, start_phase, pulse_power):
+    def __init__(self, position, start_phase, pulse_power, pos_error=False):
+        if pos_error: # If wants position error we add it here
+            position = tuple(position + np.random.normal(0, pos_error_sigma_per_axis, 3))
         self.position = position # Position of the antenna
         self.start_phase = start_phase # The phase it start to transmit with
         self.pulse_power = pulse_power  # Power of antenna pulse
@@ -125,7 +127,7 @@ def create_antennas_array():
     for i in range(Nx + 1):
         for j in range(Ny + 1):
             a_pos = (0, i * dx, j * dy)
-            antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna))
+            antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna, True))
     return antennas_array
 
 def check_array_on_target(antennas_array, target_position):
@@ -326,7 +328,7 @@ def print_max_gain_and_angles():
 if __name__ == '__main__':
     array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
     antennas_array = np.array(create_antennas_array())
-    antennas_array = shift_phases_of_antennas_array(antennas_array, np.radians(100), np.radians(30))
+    antennas_array = shift_phases_of_antennas_array(antennas_array, np.radians(90), np.radians(0))
     target_range = 10000
     positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)
     density_of_single_antenna, _ = calculate_the_density_of_single_antenna_by_given_positions(array_center_pos, target_range)
