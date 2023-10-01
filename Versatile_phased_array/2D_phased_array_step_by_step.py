@@ -102,7 +102,7 @@ class IsotropicAntenna:
                 self.start_phase == other.start_phase and
                 self.pulse_power == other.pulse_power)
 
-def create_antennas_array():
+def create_isotropic_antennas_planar_array(center):
     """
         Create an array of isotropic antennas based on predefined grid dimensions and spacing.
 
@@ -121,11 +121,27 @@ def create_antennas_array():
             4. IsotropicAntenna: A class representing an isotropic antenna. It should have a constructor
                                  that accepts position, starting phase, and power as arguments.
     """
+    planar_center = (0, Ny * dy / 2, Nz * dz / 2)
     antennas_array = []
-    for i in range(Nx + 1):
-        for j in range(Ny + 1):
-            a_pos = (0, i * dx, j * dy)
+    for i in range(Ny + 1):
+        for j in range(Nz + 1):
+            # we subtract the array center so it will be centered
+            x_pos = 0 - planar_center[0] + center[0]
+            y_pos = i * dy - planar_center[1] + center[1]
+            z_pos = j * dz - planar_center[2] + center[2]
+            a_pos = (x_pos, y_pos, z_pos)
             antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna, True))
+    return antennas_array
+
+def create_random_isotropic_antennas_array(center):
+    cube_center = (array_side_size / 2, array_side_size / 2, array_side_size / 2)
+    antennas_array = []
+    for i in range((Ny + 1) * (Nz + 1)):
+        x_pos = 0 # random.uniform(0, array_side_size) - cube_center[0] + center[0]
+        y_pos = random.uniform(0, array_side_size) - cube_center[1] + center[1]
+        z_pos = random.uniform(0, array_side_size) - cube_center[2] + center[2]
+        a_pos = (x_pos, y_pos, z_pos)
+        antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna, True))
     return antennas_array
 
 def check_array_on_target(antennas_array, target_position):
@@ -352,8 +368,9 @@ if __name__ == '__main__':
     6. Converts the gains to decibels.
     7. Plots the radiation pattern of the antenna array.
     """
-    array_center_pos = (0, Nx * dx / 2, Ny * dy / 2)
-    antennas_array = np.array(create_antennas_array())
+    array_center_pos = (0, 0, 0)
+    antennas_array = np.array(create_isotropic_antennas_planar_array(array_center_pos))
+    # antennas_array = np.array(create_random_isotropic_antennas_array(array_center_pos))
     antennas_array = shift_phases_of_antennas_array(antennas_array, np.radians(90), np.radians(0))
     target_range = 10000
     positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)
