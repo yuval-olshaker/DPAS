@@ -1,6 +1,6 @@
 import numpy as np
-import random
 import matplotlib.pyplot as plt
+from scipy.spatial import ConvexHull
 
 # Parameters
 frequency = 1e9  # 1 GHz
@@ -19,6 +19,7 @@ dz = 0.5 * wavelength  # Spacing along z
 x = np.arange(Ny) * dy
 y = np.arange(Nz) * dz
 array_side_size = 10 # 10 X 10 X 10 m^3 cube
+random_pos_sigma = array_side_size / (2 * 3) # 2 because of 2 sides, 3 so 3 sigma is the side size
 
 # Angles
 azimuth_range = np.radians(240) # 120 degrees
@@ -77,3 +78,57 @@ def normalize_angle(angle):
     if normalized_angle > np.pi:
         normalized_angle -= 2 * np.pi
     return normalized_angle
+
+def centroid_of_convex_hull(points):
+    """
+    Calculate the centroid of the convex hull formed by an array of 3D points.
+
+    Parameters:
+    - points: Array of 3D points.
+
+    Returns:
+    - Centroid of the convex hull.
+    """
+    hull = ConvexHull(points)
+    total_volume = 0
+    centroid_sum = np.zeros(3)
+
+    for simplex in hull.simplices:
+        # Form a tetrahedron using the reference point and the face
+        tetra = [hull.points[simplex[0]], hull.points[simplex[1]], hull.points[simplex[2]], hull.points[0]]
+        volume = ConvexHull(tetra).volume
+        total_volume += volume
+
+        # Calculate the centroid of the tetrahedron
+        tetrahedron_centroid = np.mean(tetra, axis=0)
+        centroid_sum += tetrahedron_centroid * volume
+
+    # Calculate the final centroid
+    centroid = centroid_sum / total_volume
+    return centroid
+
+
+def centroid_of_planar_convex_hull(points):
+    """
+    Calculate the centroid of the convex hull for points that all lie on the same plane.
+
+    Parameters:
+    - points: Array of 3D points.
+
+    Returns:
+    - Centroid of the convex hull.
+    """
+    points = np.array(points)
+    # Project points to 2D by removing the constant coordinate
+    points_2d = points[:, 1:]
+
+    # Compute the convex hull of the 2D points
+    hull = ConvexHull(points_2d)
+
+    # Calculate the centroid of the 2D convex hull
+    centroid_2d = np.mean(hull.points[hull.vertices], axis=0)
+
+    # Map the 2D centroid back to 3D
+    centroid = np.array([points[0, 0], centroid_2d[0], centroid_2d[1]])
+
+    return centroid
