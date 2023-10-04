@@ -143,20 +143,10 @@ def create_random_isotropic_antennas_array(center):
     Returns:
     - list: A list of `IsotropicAntenna` objects with random positions within the cube.
     """
-    # cube_center = (0, 0, 0)
-    antennas_array, positions = [], []
-    ys, zs = [], []
-    for i in range((Ny + 1) * (Nz + 1)):
-        x_pos = 0 + center[0] # np.random.uniform(0, array_side_size) - cube_center[0] + center[0]
-        y_pos = np.random.normal(0, random_pos_sigma) + center[1]
-        z_pos = np.random.normal(0, random_pos_sigma) + center[2]
-        a_pos = (x_pos, y_pos, z_pos)
-        positions.append(a_pos)
-        antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna, True))
-        ys.append(y_pos)
-        zs.append(z_pos)
-    print(np.mean(ys))
-    print(np.mean(zs))
+    antennas_array = []
+    positions = generate_random_3D_points((Ny + 1) * (Nz + 1), center, radius_for_random_antenna_positions)
+    for pos in positions:
+        antennas_array.append(IsotropicAntenna(pos, 0, Pt_antenna, True))
     return np.array(antennas_array), positions
 
 def check_array_on_target(antennas_array, target_position):

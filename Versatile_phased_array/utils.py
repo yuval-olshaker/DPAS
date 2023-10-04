@@ -18,8 +18,7 @@ dy = 0.5 * wavelength  # Spacing along y
 dz = 0.5 * wavelength  # Spacing along z
 x = np.arange(Ny) * dy
 y = np.arange(Nz) * dz
-array_side_size = 10 # 10 X 10 X 10 m^3 cube
-random_pos_sigma = array_side_size / (2 * 3) # 2 because of 2 sides, 3 so 3 sigma is the side size
+radius_for_random_antenna_positions = 10 # 10m radius
 
 # Angles
 azimuth_range = np.radians(240) # 120 degrees
@@ -132,3 +131,40 @@ def centroid_of_planar_convex_hull(points):
     centroid = np.array([points[0, 0], centroid_2d[0], centroid_2d[1]])
 
     return centroid
+
+
+def generate_random_3D_points(n, centroid, r):
+    """
+    Generate n random 3D points around a specified centroid within a radius r.
+
+    Parameters:
+    - n: Number of random points to generate.
+    - centroid: Tuple (x_centroid, y_centroid, z_centroid).
+    - r: Radius within which to generate random points.
+
+    Returns:
+    - Array of shape (n, 3) containing the random 3D points.
+    """
+    points = []
+    for _ in range(n):
+        # Generate random direction (unit vector)
+        theta = 2 * np.pi * np.random.rand()
+        phi = np.arccos(2 * np.random.rand() - 1)
+        x_dir = np.sin(phi) * np.cos(theta)
+        y_dir = np.sin(phi) * np.sin(theta)
+        z_dir = np.cos(phi)
+
+        # Scale by random length between 0 and r
+        length = r * np.cbrt(np.random.rand())  # Cube root for uniform distribution in 3D
+        x_offset = x_dir * length
+        y_offset = y_dir * length
+        z_offset = z_dir * length
+
+        # Add offset to centroid
+        x_point = centroid[0] + x_offset
+        y_point = centroid[1] + y_offset
+        z_point = centroid[2] + z_offset
+
+        points.append([x_point, y_point, z_point])
+
+    return np.array(points)
