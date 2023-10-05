@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 # Parameters
 frequency = 1e8  # 1 GHz
 c = 3e8  # Speed of light
-wavelength = c / frequency  # 0.3 m - 30 cm
+wavelength = c / frequency  # 0.3 m - 30 cm (for 1 GHz)
 k = 2 * np.pi / wavelength  # wave number
 epsilon = 1e-10
 antenna_size = wavelength / 2
