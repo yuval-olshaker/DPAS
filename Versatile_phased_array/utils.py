@@ -157,7 +157,7 @@ def generate_random_3D_points(n, centroid, r):
         z_dir = np.cos(phi)
 
         # Scale by random length between 0 and r
-        length = r * np.cbrt(np.random.rand())  # Cube root for uniform distribution in 3D
+        length = r * np.random.rand()
         x_offset = x_dir * length
         y_offset = y_dir * length
         z_offset = z_dir * length
