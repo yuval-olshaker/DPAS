@@ -1,7 +1,5 @@
 needs to add pulse width and make it more realistic
 
-add time error - how they affect us
-
 get more distance between antennas - really random positioning -> does not work well
 
 check real targets - where do we actually see them
