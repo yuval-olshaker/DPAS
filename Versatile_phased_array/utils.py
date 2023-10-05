@@ -20,20 +20,20 @@ dy = 0.5 * wavelength  # Spacing along y
 dz = 0.5 * wavelength  # Spacing along z
 x = np.arange(Ny) * dy
 y = np.arange(Nz) * dz
-radius_for_random_antenna_positions = 10 # 10m radius
+radius_for_random_antenna_positions = 10  # 10m radius
 
 # Angles
-azimuth_range = np.radians(30) # 120 degrees
-elevation_range = np.radians(30) # 60 degrees
+azimuth_range = np.radians(30)  # 120 degrees
+elevation_range = np.radians(30)  # 60 degrees
 PHI = np.linspace(- azimuth_range / 2, azimuth_range / 2, 50)
 THETA = np.linspace(-elevation_range / 2, elevation_range / 2, 50)
-azimuth_resolution = 1 # milliradian
-azimuth_resolution = (azimuth_resolution / (1000 * 2 * np.pi)) * 360 # degrees
-elevation_resolution = 2 # milliradian
-elevation_resolution = (elevation_resolution / (1000 * 2 * np.pi)) * 360 # degrees
+azimuth_resolution = 1  # milliradian
+azimuth_resolution = (azimuth_resolution / (1000 * 2 * np.pi)) * 360  # degrees
+elevation_resolution = 2  # milliradian
+elevation_resolution = (elevation_resolution / (1000 * 2 * np.pi)) * 360  # degrees
 
 # Pulse energy at each antenna
-Pt_antenna = 1 # in watt per pulse
+Pt_antenna = 1  # in watt per pulse
 Pt_array = Pt_antenna * Ny * Nz
 
 # Target
@@ -46,11 +46,12 @@ kB = 1.38 * 1e-23
 pulse_bandwidth = 50 * 1e6
 
 # Params for SNR
-G = 5000 # 37 DB
-Ae = Ny * Nz * 1 # 1 meter spacing for antenna size. affective size is the whole size
+G = 5000  # 37 DB
+Ae = Ny * Nz * 1  # 1 meter spacing for antenna size. affective size is the whole size
 
 # Errors
-pos_error_sigma_per_axis = 0 / 100 # 0.5 cm error per axis
+pos_error_sigma_per_axis = 0 / 100  # 0.5 cm error per axis
+time_error_sigma = 1e-9  # 1 nano second
 
 def distance(pos1, pos2):
     """

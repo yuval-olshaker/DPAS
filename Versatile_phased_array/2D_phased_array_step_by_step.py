@@ -57,11 +57,13 @@ def antenna_radiation_at_target(antenna, target_pos):
     return antenna.radiation_at_target(target_pos)
 
 class IsotropicAntenna:
-    def __init__(self, position, start_phase, pulse_power, pos_error=False):
-        if pos_error: # If wants position error we add it here
+    def __init__(self, position, start_phase, pulse_power, pos_error=True, time_error=True):
+        if pos_error:  # If we want position error we add it here
             position = tuple(position + np.random.normal(0, pos_error_sigma_per_axis, 3))
-        self.position = position # Position of the antenna
-        self.start_phase = start_phase # The phase it start to transmit with
+        if time_error:  # If we want clock error we add it here
+            start_phase += np.random.normal(0, time_error_sigma) * c * k
+        self.position = position  # Position of the antenna
+        self.start_phase = start_phase  # The phase it start to transmit with
         self.pulse_power = pulse_power  # Power of antenna pulse
 
     def radiation_at_target(self, target_position):
@@ -126,7 +128,7 @@ def create_isotropic_antennas_planar_array(center):
             z_pos = j * dz - planar_center[2] + center[2]
             a_pos = (x_pos, y_pos, z_pos)
             positions.append(a_pos)
-            antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna, True))
+            antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna))
     return np.array(antennas_array), positions
 
 def create_random_isotropic_antennas_array(center):
@@ -146,7 +148,7 @@ def create_random_isotropic_antennas_array(center):
     antennas_array = []
     positions = generate_random_3D_points((Ny + 1) * (Nz + 1), center, radius_for_random_antenna_positions)
     for pos in positions:
-        antennas_array.append(IsotropicAntenna(pos, 0, Pt_antenna, True))
+        antennas_array.append(IsotropicAntenna(pos, 0, Pt_antenna))
     return np.array(antennas_array), positions
 
 def check_array_on_target(antennas_array, target_position):
@@ -216,7 +218,7 @@ def calculate_the_density_of_single_antenna_by_given_positions(antenna_pos, targ
     Returns:
     - float: The radiation density of the isotropic antenna at the specified target range.
     """
-    antenna = IsotropicAntenna(antenna_pos, 0, Pt_antenna)
+    antenna = IsotropicAntenna(antenna_pos, 0, Pt_antenna, False, False)
     return antenna.radiation_at_range(target_range)
 
 def compute_phase_shifts(nx, ny, dx, dy, wavelength, theta, phi):
@@ -308,7 +310,7 @@ def shift_phases_of_antennas_array(antennas_array, theta, phi):
     antenna_positions = np.transpose(np.vectorize(lambda antenna: antenna.position)(antennas_array))
     delta_phases = compute_phase_shifts_for_given_antenna_positions(antenna_positions, theta, phi)
     for antenna, delta_phase in zip(antennas_array, delta_phases):
-        antenna.start_phase = normalize_angle(delta_phase)
+        antenna.start_phase += normalize_angle(delta_phase)
     return antennas_array
 
 def print_max_gain_and_angles():
@@ -378,7 +380,7 @@ if __name__ == '__main__':
     antennas_array, antennas_positions = create_isotropic_antennas_planar_array(array_center_pos)
     # antennas_array, antennas_positions = create_random_isotropic_antennas_array(array_center_pos)
     antennas_array = shift_phases_of_antennas_array(antennas_array, np.radians(90), np.radians(0))
-    print(centroid_of_planar_convex_hull(antennas_positions))
+    # print(centroid_of_convex_hull(antennas_positions))
     target_range = 10000
     positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)
     density_of_single_antenna, _ = calculate_the_density_of_single_antenna_by_given_positions(array_center_pos, target_range)
