@@ -50,7 +50,7 @@ G = 5000  # 37 DB
 Ae = Ny * Nz * 1  # 1 meter spacing for antenna size. affective size is the whole size
 
 # Errors
-pos_error_sigma_per_axis = 10 / 100  # 0.5 cm error per axis
+pos_error_sigma_per_axis = 10 / 100  # cms error per axis
 time_error_sigma = 1e-9  # 1 nano second
 
 
