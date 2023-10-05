@@ -57,14 +57,40 @@ def antenna_radiation_at_target(antenna, target_pos):
     return antenna.radiation_at_target(target_pos)
 
 class IsotropicAntenna:
+    """
+    Represents an antenna system.
+
+    This class models an isotropic antenna system with the ability to introduce position and time errors during initialization.
+
+    Parameters:
+        position (tuple): A tuple representing the position (x, y, z) of the antenna.
+        start_phase (float): The phase at which the antenna starts transmitting.
+        pulse_power (float): The power of the antenna pulse.
+        pos_error (bool, optional): If True, random position errors are added during initialization.
+            Default is True.
+        time_error (bool, optional): If True, clock error is simulated by adding a phase error based on
+            a normal distribution. Default is True.
+
+    Attributes:
+        position (tuple): The position (x, y, z) of the antenna.
+        start_phase (float): The phase at which the antenna starts transmitting.
+        pulse_power (float): The power of the antenna pulse.
+    """
+
     def __init__(self, position, start_phase, pulse_power, pos_error=True, time_error=True):
-        if pos_error:  # If we want position error we add it here
-            position = tuple(position + np.random.normal(0, pos_error_sigma_per_axis, 3))
-        if time_error:  # If we want clock error we add it here
-            start_phase += np.random.normal(0, time_error_sigma) * c * k
-        self.position = position  # Position of the antenna
-        self.start_phase = start_phase  # The phase it start to transmit with
+        self.desired_position = position  # Position of the antenna
+        self.desired_start_phase = start_phase  # The phase it starts to transmit with
         self.pulse_power = pulse_power  # Power of antenna pulse
+        if pos_error:  # If we want position error we add it here
+            self.position = tuple(position + np.random.normal(0, pos_error_sigma_per_axis, 3))
+        else:
+            self.position = position
+        if time_error:  # If we want clock error we add it here
+            # we act like the time error affects the pase as if we changed the range by the error times speed of light
+            self.start_phase = start_phase + np.random.normal(0, time_error_sigma) * c * k
+        else:
+            self.start_phase = start_phase
+
 
     def radiation_at_target(self, target_position):
         """
@@ -195,11 +221,9 @@ def generate_positions_at_distance_angles_from_point(point, angles_azi, angles_e
     z = point[2] + dis * np.sin(ele_mesh)
 
     # Reshape and stack the results
-    # positions = np.vstack((x.ravel(), y.ravel(), z.ravel())).T
     positions = np.dstack((x, y, z))
 
     # Reshape and stack the angles
-    # angles = np.vstack((azi_mesh.ravel(), ele_mesh.ravel())).T
     angles = np.dstack((azi_mesh, ele_mesh))
     return positions, np.degrees(angles)
 
@@ -288,7 +312,7 @@ def shift_phases_of_antennas_array(antennas_array, theta, phi):
 
     This function calculates the phase shifts for each antenna in the array based on their positions
     and the provided angles (theta and phi). It then updates the 'start_phase' attribute of each antenna
-    with the computed phase shift.
+    with the computed phase shift. We work on the desired positions - without the error
 
     Parameters:
     - antennas_array (numpy array): An array of antenna objects. Each antenna object should have
@@ -307,8 +331,8 @@ def shift_phases_of_antennas_array(antennas_array, theta, phi):
     """
 
     # Extract the 'position' attribute using numpy's vectorized operations
-    antenna_positions = np.transpose(np.vectorize(lambda antenna: antenna.position)(antennas_array))
-    delta_phases = compute_phase_shifts_for_given_antenna_positions(antenna_positions, theta, phi)
+    antenna_desired_positions = np.transpose(np.vectorize(lambda antenna: antenna.desired_position)(antennas_array))
+    delta_phases = compute_phase_shifts_for_given_antenna_positions(antenna_desired_positions, theta, phi)
     for antenna, delta_phase in zip(antennas_array, delta_phases):
         antenna.start_phase += normalize_angle(delta_phase)
     return antennas_array
@@ -379,7 +403,7 @@ if __name__ == '__main__':
     array_center_pos = (0, 0, 0)
     antennas_array, antennas_positions = create_isotropic_antennas_planar_array(array_center_pos)
     # antennas_array, antennas_positions = create_random_isotropic_antennas_array(array_center_pos)
-    antennas_array = shift_phases_of_antennas_array(antennas_array, np.radians(90), np.radians(0))
+    antennas_array = shift_phases_of_antennas_array(antennas_array, np.radians(100), np.radians(10))
     # print(centroid_of_convex_hull(antennas_positions))
     target_range = 10000
     positions, angles = generate_positions_at_distance_angles_from_point(array_center_pos, PHI, THETA, target_range)

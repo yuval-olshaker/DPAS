@@ -5,7 +5,7 @@ import mplcursors
 import plotly.graph_objects as go
 
 # Parameters
-frequency = 1e9  # 1 GHz
+frequency = 1e8  # 1 GHz
 c = 3e8  # Speed of light
 wavelength = c / frequency # 0.3 m - 30 cm
 k = 2 * np.pi / wavelength #wave number
@@ -23,8 +23,8 @@ y = np.arange(Nz) * dz
 radius_for_random_antenna_positions = 10  # 10m radius
 
 # Angles
-azimuth_range = np.radians(30)  # 120 degrees
-elevation_range = np.radians(30)  # 60 degrees
+azimuth_range = np.radians(120)  # 120 degrees
+elevation_range = np.radians(60)  # 60 degrees
 PHI = np.linspace(- azimuth_range / 2, azimuth_range / 2, 50)
 THETA = np.linspace(-elevation_range / 2, elevation_range / 2, 50)
 azimuth_resolution = 1  # milliradian
@@ -50,7 +50,7 @@ G = 5000  # 37 DB
 Ae = Ny * Nz * 1  # 1 meter spacing for antenna size. affective size is the whole size
 
 # Errors
-pos_error_sigma_per_axis = 0 / 100  # 0.5 cm error per axis
+pos_error_sigma_per_axis = 10 / 100  # 0.5 cm error per axis
 time_error_sigma = 1e-9  # 1 nano second
 
 def distance(pos1, pos2):
