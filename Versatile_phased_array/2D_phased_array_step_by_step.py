@@ -340,6 +340,7 @@ def print_max_gain_and_angles():
     # prints
     print(f"Maximum gain: {max_gain}")
     print(f"Angles of maximum value: (Phi {Phi}, Theta {Theta})")
+    return max_gain
 
 if __name__ == '__main__':
     """
@@ -392,17 +393,23 @@ if __name__ == '__main__':
             # print(f"Density at Position: {positions[i, j]}, Angles (Azimuth, Elevation): {angles[i,j]} is: {den}, the gain is {gain}")
 
     gains_in_db = 10 * np.log10(gains)
-    print_max_gain_and_angles()
+    max_gain = print_max_gain_and_angles()
 
     # Plot
     PHI_deg = np.rad2deg(PHI)
     THETA_deg = np.rad2deg(THETA)
     plt.figure()
-    plt.pcolormesh(PHI_deg, THETA_deg, gains_in_db, shading='auto', vmin=-40, vmax=40)
+    pcm = plt.imshow(gains_in_db, extent=[PHI_deg.min(), PHI_deg.max(), THETA_deg.min(), THETA_deg.max()],
+                     origin='lower', aspect='auto', cmap='viridis', vmin=-max_gain, vmax=max_gain)
     plt.colorbar(label='Radiation Pattern (dB)')
     plt.title('Planar Antenna Array with Isotropic Antennas Radiation Pattern')
     plt.xlabel('Phi')
     plt.ylabel('Theta')
+
+    # Add tooltips with gain values using mplcursors
+    cursor = mplcursors.cursor(hover=True)
+    cursor.connect("add", lambda sel: sel.annotation.set_text(f"Gain (dB): {gains_in_db[sel.target.index]:.2f}"))
+
     plt.show()
 
     # for pos in positions:
