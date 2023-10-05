@@ -1,5 +1,6 @@
 from Versatile_phased_array.utils import *
 
+
 def calculate_radiation_at_target(antennas, target_pos):
     """
      Calculate the radiation power densities and phases at a target position from a list of antennas.
@@ -30,6 +31,7 @@ def calculate_radiation_at_target(antennas, target_pos):
 
     return power_densities_at_target, phases_at_target
 
+
 def sum_radiation(power_densities_at_target, phases_at_target):
     """
     Sum up the radiation from multiple antennas at the target position.
@@ -47,6 +49,7 @@ def sum_radiation(power_densities_at_target, phases_at_target):
 
     return total_power_density
 
+
 def antenna_radiation_at_target(antenna, target_pos):
     """
     Calculates the radiation_at_target of the antenna and target given
@@ -55,6 +58,7 @@ def antenna_radiation_at_target(antenna, target_pos):
     :return: antenna.radiation_at_target(target_pos)
     """
     return antenna.radiation_at_target(target_pos)
+
 
 class IsotropicAntenna:
     """
@@ -130,6 +134,7 @@ class IsotropicAntenna:
                 self.start_phase == other.start_phase and
                 self.pulse_power == other.pulse_power)
 
+
 def create_isotropic_antennas_planar_array(center):
     """
     Create a planar array of isotropic antennas with positions determined by the grid spacing `dy` and `dz`.
@@ -157,6 +162,7 @@ def create_isotropic_antennas_planar_array(center):
             antennas_array.append(IsotropicAntenna(a_pos, 0, Pt_antenna))
     return np.array(antennas_array), positions
 
+
 def create_random_isotropic_antennas_array(center):
     """
     Create an array of isotropic antennas with random positions within a cube.
@@ -176,6 +182,7 @@ def create_random_isotropic_antennas_array(center):
     for pos in positions:
         antennas_array.append(IsotropicAntenna(pos, 0, Pt_antenna))
     return np.array(antennas_array), positions
+
 
 def check_array_on_target(antennas_array, target_position):
     """
@@ -198,6 +205,7 @@ def check_array_on_target(antennas_array, target_position):
     power_densities_at_target, phases_at_target = calculate_radiation_at_target(antennas_array, target_position)
     total_power_density = sum_radiation(np.array(power_densities_at_target), np.array(phases_at_target))
     return total_power_density
+
 
 def generate_positions_at_distance_angles_from_point(point, angles_azi, angles_ele, dis):
     """
@@ -227,6 +235,7 @@ def generate_positions_at_distance_angles_from_point(point, angles_azi, angles_e
     angles = np.dstack((azi_mesh, ele_mesh))
     return positions, np.degrees(angles)
 
+
 def calculate_the_density_of_single_antenna_by_given_positions(antenna_pos, target_range):
     """
     Calculate the radiation density of a single isotropic antenna at a given range.
@@ -244,6 +253,7 @@ def calculate_the_density_of_single_antenna_by_given_positions(antenna_pos, targ
     """
     antenna = IsotropicAntenna(antenna_pos, 0, Pt_antenna, False, False)
     return antenna.radiation_at_range(target_range)
+
 
 def compute_phase_shifts(nx, ny, dx, dy, wavelength, theta, phi):
     """
@@ -274,6 +284,7 @@ def compute_phase_shifts(nx, ny, dx, dy, wavelength, theta, phi):
                                nyy * dy * np.sin(theta) * np.sin(phi)) / wavelength)
 
     return delta_phi
+
 
 def compute_phase_shifts_for_given_antenna_positions(antenna_positions, theta, phi):
     """
@@ -306,6 +317,7 @@ def compute_phase_shifts_for_given_antenna_positions(antenna_positions, theta, p
 
     return delta_phases
 
+
 def shift_phases_of_antennas_array(antennas_array, theta, phi):
     """
     Shift the phases of antennas in the array based on their positions and given angles.
@@ -337,6 +349,7 @@ def shift_phases_of_antennas_array(antennas_array, theta, phi):
         antenna.start_phase += normalize_angle(delta_phase)
     return antennas_array
 
+
 def print_max_gain_and_angles():
     """
     Prints the maximum gain value and its corresponding angles from the global 'gains_in_db' array.
@@ -367,6 +380,7 @@ def print_max_gain_and_angles():
     print(f"Maximum gain: {max_gain}")
     print(f"Angles of maximum value: (Phi {Phi}, Theta {Theta})")
     return max_gain
+
 
 if __name__ == '__main__':
     """

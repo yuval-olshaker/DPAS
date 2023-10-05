@@ -7,8 +7,8 @@ import plotly.graph_objects as go
 # Parameters
 frequency = 1e8  # 1 GHz
 c = 3e8  # Speed of light
-wavelength = c / frequency # 0.3 m - 30 cm
-k = 2 * np.pi / wavelength #wave number
+wavelength = c / frequency  # 0.3 m - 30 cm
+k = 2 * np.pi / wavelength  # wave number
 epsilon = 1e-10
 antenna_size = wavelength / 2
 
@@ -53,6 +53,7 @@ Ae = Ny * Nz * 1  # 1 meter spacing for antenna size. affective size is the whol
 pos_error_sigma_per_axis = 10 / 100  # 0.5 cm error per axis
 time_error_sigma = 1e-9  # 1 nano second
 
+
 def distance(pos1, pos2):
     """
         Calculate the Euclidean distance between two points.
@@ -65,6 +66,7 @@ def distance(pos1, pos2):
         - float: The Euclidean distance between pos1 and pos2.
     """
     return np.linalg.norm(np.array(pos1) - np.array(pos2))
+
 
 def normalize_angle(angle):
     """
@@ -80,6 +82,7 @@ def normalize_angle(angle):
     if normalized_angle > np.pi:
         normalized_angle -= 2 * np.pi
     return normalized_angle
+
 
 def centroid_of_convex_hull(points):
     """
